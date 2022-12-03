@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import tf2_ros
 import rospy
 from dataclasses import dataclass
 from threading import Thread, Lock
@@ -111,15 +110,18 @@ class MotorManager:
         self.__motorControls = {}
         self.__controlPublisher = rospy.Publisher('MotorControl', Motor_Control)
         self.__configPublisher = rospy.Publisher('MotorConfiguration', Motor_Configuration)
-        x = Thread(target=self.motorMasterLoop)
+        self.__mutex = Lock()
+        x = Thread(target=self.__motorMasterLoop)
         x.start()
 
     def apply_motor_config(self, motorId : int, motorConfig : MotorConfig):
-        self.__motorConfigs[motorId] = motorConfig
+        with self.__mutex:
+            self.__motorConfigs[motorId] = motorConfig
 
     def update_motor_control(self, motorId : int, outputControl : OutputControl):
-        self.__motorControls[motorId] = outputControl
-        self.__set_motor_now(motorId, outputControl)
+        with self.__mutex:
+            self.__motorControls[motorId] = outputControl
+            self.__set_motor_now(motorId, outputControl)
 
     @staticmethod
     def __create_motor_control_dictionary(motorId : int, motorControl : OutputControl):
@@ -214,11 +216,12 @@ class MotorManager:
         controlMessage.motors.append(self.__create_motor_control_dictionary(motorId, self.__motorControls[motorId]))
         self.__controlPublisher.publish(controlMessage)
 
-    def motorMasterLoop(self):
+    def __motorMasterLoop(self):
         r = rospy.Rate(10) #10hz
         while not rospy.is_shutdown():
-            self.__transmit_motor_controls()
-            self.__transmit_motor_configs()
+            with self.__mutex:
+                self.__transmit_motor_controls()
+                self.__transmit_motor_configs()
             r.sleep()
 
 class Motor:
