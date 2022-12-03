@@ -10,12 +10,24 @@ from rio_control_node.msg import Motor_Control
 from rio_control_node.msg import Motor_Configuration
 from rio_control_node.msg import Motor_Config
 from rio_control_node.msg import Motor
+from rio_control_node.msg import Current_Limit_Configuration
 from enum import Enum
 from time import sleep
 
 class NeutralMode(Enum):
     Coast = 1
     Brake = 2
+
+class ConfigMode(Enum):
+    Master = 0
+    FastMaster = 1
+    Follower = 2
+
+class InvertType(Enum):
+    Nope = 0
+    InvertMotorOutput = 1
+    FollowMaster = 2
+    OpposeMaster = 3
 
 class LimitSwitchSource(Enum):
     FeedbackConnector = 0
@@ -34,15 +46,16 @@ class MotorType(Enum):
     TalonSRX = 1
 
 class ControlMode(Enum):
-        PERCENT_OUTPUT = 0
-        POSITION = 1
-        VELOCITY = 2
-        CURRENT = 3
-        MOTION_PROFILE = 6
-        MOTION_MAGIC = 7
-        MOTION_PROFILE_ARC = 10
-        MUSIC_TONE = 13
-        DISABLED = 15
+    PERCENT_OUTPUT = 0
+    POSITION = 1
+    VELOCITY = 2
+    CURRENT = 3
+    __FOLLOWER = 5
+    MOTION_PROFILE = 6
+    MOTION_MAGIC = 7
+    MOTION_PROFILE_ARC = 10
+    MUSIC_TONE = 13
+    DISABLED = 15
 
 @dataclass
 class OutputControl:
@@ -111,29 +124,88 @@ class MotorManager:
 
     @staticmethod
     def __create_motor_control_dictionary(motorId : int, motorControl : OutputControl):
-        motorControlMsg = Motor_Control()
+        motorControlMsg = Motor()
         motorControlMsg.id = motorId
         motorControlMsg.controller_type = motorControl.type
         motorControlMsg.control_mode = motorControl.controlMode
         motorControlMsg.output_value = motorControl.output
         motorControlMsg.arbitrary_feedforward = motorControl.arbFF
+        return motorControlMsg
 
     @staticmethod
     def __create_motor_config_dictionary(motorId : int, motorConfig : MotorConfig):
-        print()
+        motorConfigMsg = Motor_Config()
+        motorConfigMsg.id = motorId
+        motorConfigMsg.controller_type = motorConfig.type
+        if motorConfig.followingEnabled:
+            motorConfigMsg.controller_mode = ConfigMode.Follower
+            motorConfigMsg.invert_type = InvertType.OpposeMaster if motorConfig.inverted else InvertType.FollowMaster
+        elif motorConfig.fast_master:
+            motorConfigMsg.controller_mode = ConfigMode.FastMaster
+            motorConfigMsg.invert_type = InvertType.InvertMotorOutput if motorConfig.inverted else InvertType.Nope
+        else:
+            motorConfigMsg.controller_mode = ConfigMode.Master
+            motorConfigMsg.invert_type = InvertType.InvertMotorOutput if motorConfig.inverted else InvertType.Nope
+        motorConfigMsg.kP = motorConfig.kP
+        motorConfigMsg.kI = motorConfig.kI
+        motorConfigMsg.kD = motorConfig.kD
+        motorConfigMsg.kF = motorConfig.kF
+        motorConfigMsg.iZone = motorConfig.iZone
+        motorConfigMsg.max_i_accum = motorConfig.maxIAccum
+        motorConfigMsg.allowed_closed_loop_error = motorConfig.allowedClosedLoopError
+        motorConfigMsg.max_closed_loop_peak_output = motorConfig.maxClosedLoopPeakOutput
+        motorConfigMsg.motion_cruise_velocity = motorConfig.motionCruiseVelocity
+        motorConfigMsg.motion_acceleration = motorConfig.motionCruiseAcceleration
+        motorConfigMsg.motion_s_curve_strength = motorConfig.motionSCurveStrength
+        motorConfigMsg.forward_soft_limit = motorConfig.forwardSoftLimit
+        motorConfigMsg.forward_soft_limit_enable = motorConfig.forwardSoftLimitEnable
+        motorConfigMsg.reverse_soft_limit = motorConfig.reverseSoftLimit
+        motorConfigMsg.reverse_soft_limit_enable = motorConfig.reverseSoftLimitEnable
+        motorConfigMsg.feedback_sensor_coefficient = motorConfig.feedbackSensorCoefficient
+        motorConfigMsg.voltage_compensation_saturation = motorConfig.voltageCompensationSaturation
+        motorConfigMsg.voltage_compensation_enabled = motorConfig.voltageCompensationEnabled
+        motorConfigMsg.sensor_phase_inverted = motorConfig.sensorPhaseInverted
+        motorConfigMsg.neutral_mode = motorConfig.neutralMode
+        motorConfigMsg.open_loop_ramp = motorConfig.openLoopRamp
+        motorConfigMsg.closed_loop_ramp = motorConfig.closedLoopRamp
+        supplyCurrentLimit = Current_Limit_Configuration()
+        supplyCurrentLimit.enable = motorConfig.supplyCurrentLimitEnable
+        supplyCurrentLimit.current_limit = motorConfig.supplyCurrentLimit
+        supplyCurrentLimit.trigger_threshold_current = motorConfig.supplyCurrentLimitThresholdCurrent
+        supplyCurrentLimit.trigger_threshold_time = motorConfig.supplyCurrentLimitThresholdTime
+        motorConfigMsg.supply_current_limit_config = supplyCurrentLimit
+        statorCurrentLimit = Current_Limit_Configuration()
+        statorCurrentLimit.enable = motorConfig.statorCurrentLimitEnable
+        statorCurrentLimit.current_limit = motorConfig.statorCurrentLimit
+        statorCurrentLimit.trigger_threshold_current = motorConfig.statorCurrentLimitThresholdCurrent
+        statorCurrentLimit.trigger_threshold_time = motorConfig.statorCurrentLimitThresholdTime
+        statorCurrentLimit.stator_current_limit_config = statorCurrentLimit
+        motorConfigMsg.forward_limit_switch_source = motorConfig.forwardLimitSwitchSource
+        motorConfigMsg.forward_limit_switch_normal = motorConfig.forwardLimitSwitchNormal
+        motorConfigMsg.reverse_limit_switch_source = motorConfig.reverseLimitSwitchSource
+        motorConfigMsg.reverse_limit_switch_normal = motorConfig.reverseLimitSwitchNormal
+        motorConfigMsg.peak_output_forward = motorConfig.peakOutputForward
+        motorConfigMsg.peak_output_reverse = motorConfig.peakOutputReverse
 
     def __transmit_motor_configs(self):
         configMessage = Motor_Configuration()
         configMessage.motors = []
         for motorId in self.__motorConfigs.keys():
-            configMessage.motors.append(self.__create_motor_config_dictionary(motorId, self.__motorConfigs[motorId]))
+            if motorId in self.__motorControls:
+                configMessage.motors.append(self.__create_motor_config_dictionary(motorId, self.__motorConfigs[motorId]))
         self.__configPublisher.publish(configMessage)
 
     def __transmit_motor_controls(self):
         controlMessage = Motor_Control()
         controlMessage.motors = []
         for motorId in self.__motorControls.keys():
-            controlMessage.motors.append(self.__create_motor_control_dictionary(motorId, self.__motorControls[motorId]))
+            if motorId in self.__motorConfigs:
+                if self.__motorConfigs[motorId]:
+                    controlStructure = self.__motorControls[motorId]
+                    if self.__motorConfigs[motorId].followingEnabled:
+                        controlStructure.controlMode = ControlMode.__FOLLOWER
+                        controlStructure.output = self.__motorConfigs[motorId].followerId
+                controlMessage.motors.append(self.__create_motor_control_dictionary(motorId, controlStructure))
         self.__controlPublisher.publish(controlMessage)
 
     def __set_motor_now(self, motorId : int, outputControl : OutputControl):
