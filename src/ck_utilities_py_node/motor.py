@@ -4,15 +4,13 @@ import tf2_ros
 import rospy
 from dataclasses import dataclass
 from threading import Thread, Lock
-from ck_utilities_py_node.motor import test_function
 from rio_control_node.msg import Motor_Status
 from rio_control_node.msg import Motor_Control
 from rio_control_node.msg import Motor_Configuration
 from rio_control_node.msg import Motor_Config
-from rio_control_node.msg import Motor
+import rio_control_node.msg
 from rio_control_node.msg import Current_Limit_Configuration
 from enum import Enum
-from time import sleep
 
 class NeutralMode(Enum):
     Coast = 1
@@ -113,7 +111,8 @@ class MotorManager:
         self.__motorControls = {}
         self.__controlPublisher = rospy.Publisher('MotorControl', Motor_Control)
         self.__configPublisher = rospy.Publisher('MotorConfiguration', Motor_Configuration)
-        x = Thread(target=self.motorMasterLoop, args=(self,))
+        x = Thread(target=self.motorMasterLoop)
+        x.start()
 
     def apply_motor_config(self, motorId : int, motorConfig : MotorConfig):
         self.__motorConfigs[motorId] = motorConfig
@@ -124,10 +123,10 @@ class MotorManager:
 
     @staticmethod
     def __create_motor_control_dictionary(motorId : int, motorControl : OutputControl):
-        motorControlMsg = Motor()
+        motorControlMsg = rio_control_node.msg.Motor()
         motorControlMsg.id = motorId
-        motorControlMsg.controller_type = motorControl.type
-        motorControlMsg.control_mode = motorControl.controlMode
+        motorControlMsg.controller_type = motorControl.type.value
+        motorControlMsg.control_mode = motorControl.controlMode.value
         motorControlMsg.output_value = motorControl.output
         motorControlMsg.arbitrary_feedforward = motorControl.arbFF
         return motorControlMsg
@@ -136,16 +135,16 @@ class MotorManager:
     def __create_motor_config_dictionary(motorId : int, motorConfig : MotorConfig):
         motorConfigMsg = Motor_Config()
         motorConfigMsg.id = motorId
-        motorConfigMsg.controller_type = motorConfig.type
+        motorConfigMsg.controller_type = motorConfig.type.value
         if motorConfig.followingEnabled:
-            motorConfigMsg.controller_mode = ConfigMode.Follower
-            motorConfigMsg.invert_type = InvertType.OpposeMaster if motorConfig.inverted else InvertType.FollowMaster
+            motorConfigMsg.controller_mode = ConfigMode.Follower.value
+            motorConfigMsg.invert_type = InvertType.OpposeMaster.value if motorConfig.inverted else InvertType.FollowMaster.value
         elif motorConfig.fast_master:
-            motorConfigMsg.controller_mode = ConfigMode.FastMaster
-            motorConfigMsg.invert_type = InvertType.InvertMotorOutput if motorConfig.inverted else InvertType.Nope
+            motorConfigMsg.controller_mode = ConfigMode.FastMaster.value
+            motorConfigMsg.invert_type = InvertType.InvertMotorOutput.value if motorConfig.inverted else InvertType.Nope.value
         else:
-            motorConfigMsg.controller_mode = ConfigMode.Master
-            motorConfigMsg.invert_type = InvertType.InvertMotorOutput if motorConfig.inverted else InvertType.Nope
+            motorConfigMsg.controller_mode = ConfigMode.Master.value
+            motorConfigMsg.invert_type = InvertType.InvertMotorOutput.value if motorConfig.inverted else InvertType.Nope.value
         motorConfigMsg.kP = motorConfig.kP
         motorConfigMsg.kI = motorConfig.kI
         motorConfigMsg.kD = motorConfig.kD
@@ -165,7 +164,7 @@ class MotorManager:
         motorConfigMsg.voltage_compensation_saturation = motorConfig.voltageCompensationSaturation
         motorConfigMsg.voltage_compensation_enabled = motorConfig.voltageCompensationEnabled
         motorConfigMsg.sensor_phase_inverted = motorConfig.sensorPhaseInverted
-        motorConfigMsg.neutral_mode = motorConfig.neutralMode
+        motorConfigMsg.neutral_mode = motorConfig.neutralMode.value
         motorConfigMsg.open_loop_ramp = motorConfig.openLoopRamp
         motorConfigMsg.closed_loop_ramp = motorConfig.closedLoopRamp
         supplyCurrentLimit = Current_Limit_Configuration()
@@ -179,13 +178,14 @@ class MotorManager:
         statorCurrentLimit.current_limit = motorConfig.statorCurrentLimit
         statorCurrentLimit.trigger_threshold_current = motorConfig.statorCurrentLimitThresholdCurrent
         statorCurrentLimit.trigger_threshold_time = motorConfig.statorCurrentLimitThresholdTime
-        statorCurrentLimit.stator_current_limit_config = statorCurrentLimit
-        motorConfigMsg.forward_limit_switch_source = motorConfig.forwardLimitSwitchSource
-        motorConfigMsg.forward_limit_switch_normal = motorConfig.forwardLimitSwitchNormal
-        motorConfigMsg.reverse_limit_switch_source = motorConfig.reverseLimitSwitchSource
-        motorConfigMsg.reverse_limit_switch_normal = motorConfig.reverseLimitSwitchNormal
+        motorConfigMsg.stator_current_limit_config = statorCurrentLimit
+        motorConfigMsg.forward_limit_switch_source = motorConfig.forwardLimitSwitchSource.value
+        motorConfigMsg.forward_limit_switch_normal = motorConfig.forwardLimitSwitchNormal.value
+        motorConfigMsg.reverse_limit_switch_source = motorConfig.reverseLimitSwitchSource.value
+        motorConfigMsg.reverse_limit_switch_normal = motorConfig.reverseLimitSwitchNormal.value
         motorConfigMsg.peak_output_forward = motorConfig.peakOutputForward
         motorConfigMsg.peak_output_reverse = motorConfig.peakOutputReverse
+        return motorConfigMsg
 
     def __transmit_motor_configs(self):
         configMessage = Motor_Configuration()
@@ -219,7 +219,7 @@ class MotorManager:
         while not rospy.is_shutdown():
             self.__transmit_motor_controls()
             self.__transmit_motor_configs()
-            r.sleep(0.1)
+            r.sleep()
 
 class Motor:
     manager = None
