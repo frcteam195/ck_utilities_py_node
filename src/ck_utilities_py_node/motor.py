@@ -7,7 +7,11 @@ from threading import Thread, Lock
 from ck_utilities_py_node.motor import test_function
 from rio_control_node.msg import Motor_Status
 from rio_control_node.msg import Motor_Control
+from rio_control_node.msg import Motor_Configuration
+from rio_control_node.msg import Motor_Config
+from rio_control_node.msg import Motor
 from enum import Enum
+from time import sleep
 
 class NeutralMode(Enum):
     Coast = 1
@@ -25,8 +29,30 @@ class LimitSwitchNormal(Enum):
     NormallyClosed = 1
     Disabled = 2
 
+class MotorType(Enum):
+    TalonFX = 0
+    TalonSRX = 1
+
+class ControlMode(Enum):
+        PERCENT_OUTPUT = 0
+        POSITION = 1
+        VELOCITY = 2
+        CURRENT = 3
+        MOTION_PROFILE = 6
+        MOTION_MAGIC = 7
+        MOTION_PROFILE_ARC = 10
+        MUSIC_TONE = 13
+        DISABLED = 15
+
+@dataclass
+class OutputControl:
+    type : MotorType = MotorType.TalonFX
+    output : float = 0
+    arbFF : float = 0
+    controlMode : ControlMode = ControlMode.PERCENT_OUTPUT
 @dataclass
 class MotorConfig:
+    type : MotorType = MotorType.TalonFX
     fast_master : bool = False
     kP : float = 0
     kI : float = 0
@@ -70,20 +96,68 @@ class MotorConfig:
 
 class MotorManager:
     def __init__(self):
-        print("I was started")
+        self.__motorConfigs = {}
+        self.__motorControls = {}
+        self.__controlPublisher = rospy.Publisher('MotorControl', Motor_Control)
+        self.__configPublisher = rospy.Publisher('MotorConfiguration', Motor_Configuration)
+        x = Thread(target=self.motorMasterLoop, args=(self,))
 
-    def apply_motor_config(motor_id : int, motorConfig : MotorConfig):
+    def apply_motor_config(self, motorId : int, motorConfig : MotorConfig):
+        self.__motorConfigs[motorId] = motorConfig
+
+    def update_motor_control(self, motorId : int, outputControl : OutputControl):
+        self.__motorControls[motorId] = outputControl
+        self.__set_motor_now(motorId, outputControl)
+
+    @staticmethod
+    def __create_motor_control_dictionary(motorId : int, motorControl : OutputControl):
+        motorControlMsg = Motor_Control()
+        motorControlMsg.id = motorId
+        motorControlMsg.controller_type = motorControl.type
+        motorControlMsg.control_mode = motorControl.controlMode
+        motorControlMsg.output_value = motorControl.output
+        motorControlMsg.arbitrary_feedforward = motorControl.arbFF
+
+    @staticmethod
+    def __create_motor_config_dictionary(motorId : int, motorConfig : MotorConfig):
         print()
 
+    def __transmit_motor_configs(self):
+        configMessage = Motor_Configuration()
+        configMessage.motors = []
+        for motorId in self.__motorConfigs.keys():
+            configMessage.motors.append(self.__create_motor_config_dictionary(motorId, self.__motorConfigs[motorId]))
+        self.__configPublisher.publish(configMessage)
+
+    def __transmit_motor_controls(self):
+        controlMessage = Motor_Control()
+        controlMessage.motors = []
+        for motorId in self.__motorControls.keys():
+            controlMessage.motors.append(self.__create_motor_control_dictionary(motorId, self.__motorControls[motorId]))
+        self.__controlPublisher.publish(controlMessage)
+
+    def __set_motor_now(self, motorId : int, outputControl : OutputControl):
+        controlMessage = Motor_Control()
+        controlMessage.motors = []
+        controlMessage.motors.append(self.__create_motor_control_dictionary(motorId, self.__motorControls[motorId]))
+        self.__controlPublisher.publish(controlMessage)
+
+    def motorMasterLoop(self):
+        r = rospy.Rate(10) #10hz
+        while not rospy.is_shutdown():
+            self.__transmit_motor_controls()
+            self.__transmit_motor_configs()
+            r.sleep(0.1)
 
 class Motor:
     manager = None
     mutex = Lock()
 
-    def __init__(self, id):
+    def __init__(self, id : int, type : MotorType):
         self.config = MotorConfig()
+        self.config.type = type
         self.id = id
-        print()
+        self.type = type
         self.spawn_motor_manager()
 
     @classmethod
@@ -93,7 +167,8 @@ class Motor:
                 cls.manager = MotorManager()
 
     def apply(self):
-        __class__.manager.apply_motor_config(self.id, self.config)
+        with self.__class__.mutex:
+            __class__.manager.apply_motor_config(self.id, self.config)
 
     def set_fast_master(self, enable : bool):
         self.config.fast_master = enable
@@ -199,3 +274,14 @@ class Motor:
 
     def set_defaults(self):
         self.config = MotorConfig()
+        self.config.type = self.type
+
+    def set(self, controlMode : ControlMode, output : float, arbitraryFeedForward : float):
+        outputControl = OutputControl()
+        outputControl.controlMode = controlMode
+        outputControl.output = output
+        outputControl.arbFF = arbitraryFeedForward
+        outputControl.type = self.type
+        with self.__class__.mutex:
+            self.__class__.manager.update_motor_control(self.id, outputControl)
+
