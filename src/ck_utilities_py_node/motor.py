@@ -108,11 +108,18 @@ class MotorManager:
     def __init__(self):
         self.__motorConfigs = {}
         self.__motorControls = {}
+        self.__motorStatuses = {}
         self.__controlPublisher = rospy.Publisher('MotorControl', Motor_Control)
         self.__configPublisher = rospy.Publisher('MotorConfiguration', Motor_Configuration)
         self.__mutex = Lock()
         x = Thread(target=self.__motorMasterLoop)
+        rospy.Subscriber("/MotorStatus", Motor_Status, self.__receive_motor_status)
         x.start()
+
+    def __receive_motor_status(self, data):
+        with self.__mutex:
+            for motor in data.motors:
+                self.__motorStatuses[motor.id] = motor
 
     def apply_motor_config(self, motorId : int, motorConfig : MotorConfig):
         with self.__mutex:
@@ -122,6 +129,10 @@ class MotorManager:
         with self.__mutex:
             self.__motorControls[motorId] = outputControl
             self.__set_motor_now(motorId, outputControl)
+
+    def get_status(self, id):
+        with self.__mutex:
+            return self.__motorStatuses[id]
 
     @staticmethod
     def __create_motor_control_dictionary(motorId : int, motorControl : OutputControl):
@@ -360,3 +371,54 @@ class Motor:
         with self.__class__.mutex:
             self.__class__.manager.update_motor_control(self.id, outputControl)
 
+    def __get_status(self):
+        with self.__class__.mutex:
+            return __class__.manager.getStatus(self.id, self.config)
+
+    def get_sensor_position(self):
+        return self.__get_status().sensor_position
+
+    def get_sensor_velocity(self):
+        return self.__get_status().sensor_velocity
+
+    def get_bus_voltage(self):
+        return self.__get_status().bus_voltage
+
+    def get_bus_current(self):
+        return self.__get_status().bus_current
+
+    def get_stator_current(self):
+        return self.__get_status().stator_current
+
+    def get_forward_limit_closed(self):
+        return self.__get_status().forward_limit_closed
+
+    def get_reverse_limit_closed(self):
+        return self.__get_status().reverse_limit_closed
+
+    def get_control_mode(self):
+        return self.__get_status().control_mode
+
+    def get_commanded_output(self):
+        return self.__get_status().commanded_output
+
+    def get_active_trajectory_arbff(self):
+        return self.__get_status().active_trajectory_arbff
+
+    def get_active_trajectory_position(self):
+        return self.__get_status().active_trajectory_position
+
+    def get_active_trajectory_velocity(self):
+        return self.__get_status().active_trajectory_velocity
+
+    def get_raw_closed_loop_error(self):
+        return self.__get_status().raw_closed_loop_error
+
+    def get_raw_integral_accum(self):
+        return self.__get_status().raw_integral_accum
+
+    def get_raw_error_derivative(self):
+        return self.__get_status().raw_error_derivative
+
+    def get_raw_output_percent(self):
+        return self.__get_status().raw_output_percent
