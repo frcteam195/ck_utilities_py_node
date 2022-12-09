@@ -31,10 +31,10 @@ class Joystick:
             raise JoystickIDOutOfRangeException("Joystick ID " + str(id) + " out of range!")
 
     @classmethod
-    def update(self, msg : Joystick_Status):
-        with self.mutex:
+    def update(cls, msg : Joystick_Status):
+        with cls.mutex:
             for joystick in msg.joysticks:
-                self.joystick_map[joystick.id] = joystick
+                cls.joystick_map[joystick.id] = joystick
 
     def getRawAxis(self, axisID : int) -> int:
         if self.__id in self.joystick_map:
