@@ -132,7 +132,9 @@ class MotorManager:
 
     def get_status(self, id):
         with self.__mutex:
-            return self.__motorStatuses[id]
+            if id in self.__motorStatuses:
+                return self.__motorStatuses[id]
+            return None
 
     @staticmethod
     def __create_motor_control_dictionary(motorId : int, motorControl : OutputControl):
@@ -293,15 +295,17 @@ class Motor:
         self.config.motionSCurveStrength = value
 
     def set_forward_soft_limit(self, value : float):
+        self.config.forwardSoftLimitEnable = True
         self.config.forwardSoftLimit = value
 
-    def set_forward_soft_limit_enable(self, enabled : float):
+    def set_forward_soft_limit_enable(self, enabled : bool):
         self.config.forwardSoftLimitEnable = enabled
 
     def set_reverse_soft_limit(self, value : float):
+        self.config.reverseSoftLimitEnable = True
         self.config.reverseSoftLimit = value
 
-    def set_reverse_soft_limit_enable(self, enabled : float):
+    def set_reverse_soft_limit_enable(self, enabled : bool):
         self.config.reverseSoftLimitEnable = enabled
 
     def set_feedback_sensor_coefficient(self, value : float):
@@ -373,52 +377,100 @@ class Motor:
 
     def __get_status(self):
         with self.__class__.mutex:
-            return __class__.manager.getStatus(self.id, self.config)
+            return __class__.manager.get_status(self.id)
 
     def get_sensor_position(self):
-        return self.__get_status().sensor_position
+        status = self.__get_status()
+        if status is not None:
+            return status.sensor_position
+        return 0.0
 
     def get_sensor_velocity(self):
-        return self.__get_status().sensor_velocity
+        status = self.__get_status()
+        if status is not None:
+            return status.sensor_velocity
+        return 0.0
 
     def get_bus_voltage(self):
-        return self.__get_status().bus_voltage
+        status = self.__get_status()
+        if status is not None:
+            return status.bus_voltage
+        return 0.0
 
     def get_bus_current(self):
-        return self.__get_status().bus_current
+        status = self.__get_status()
+        if status is not None:
+            return status.bus_current
+        return 0.0
 
     def get_stator_current(self):
-        return self.__get_status().stator_current
+        status = self.__get_status()
+        if status is not None:
+            return status.stator_current
+        return 0.0
 
     def get_forward_limit_closed(self):
-        return self.__get_status().forward_limit_closed
+        status = self.__get_status()
+        if status is not None:
+            return status.forward_limit_closed
+        return False
 
     def get_reverse_limit_closed(self):
-        return self.__get_status().reverse_limit_closed
+        status = self.__get_status()
+        if status is not None:
+            return status.reverse_limit_closed
+        return False
 
     def get_control_mode(self):
-        return self.__get_status().control_mode
+        status = self.__get_status()
+        if status is not None:
+            return status.control_mode
+        return 0
 
     def get_commanded_output(self):
-        return self.__get_status().commanded_output
+        status = self.__get_status()
+        if status is not None:
+            return status.commanded_output
+        return 0.0
 
     def get_active_trajectory_arbff(self):
-        return self.__get_status().active_trajectory_arbff
+        status = self.__get_status()
+        if status is not None:
+            return status.active_trajectory_arbff
+        return 0.0
 
     def get_active_trajectory_position(self):
-        return self.__get_status().active_trajectory_position
+        status = self.__get_status()
+        if status is not None:
+            return status.active_trajectory_position
+        return 0.0
 
     def get_active_trajectory_velocity(self):
-        return self.__get_status().active_trajectory_velocity
+        status = self.__get_status()
+        if status is not None:
+            return status.active_trajectory_velocity
+        return 0.0
 
     def get_raw_closed_loop_error(self):
-        return self.__get_status().raw_closed_loop_error
+        status = self.__get_status()
+        if status is not None:
+            return status.raw_closed_loop_error
+        return 0.0
 
     def get_raw_integral_accum(self):
-        return self.__get_status().raw_integral_accum
+        status = self.__get_status()
+        if status is not None:
+            return status.raw_integral_accum
+        return 0.0
 
     def get_raw_error_derivative(self):
-        return self.__get_status().raw_error_derivative
+        status = self.__get_status()
+        if status is not None:
+            return status.raw_error_derivative
+        return 0.0
 
     def get_raw_output_percent(self):
-        return self.__get_status().raw_output_percent
+        status = self.__get_status()
+        if status is not None:
+            return status.raw_output_percent
+        return 0.0
