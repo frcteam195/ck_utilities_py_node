@@ -109,8 +109,8 @@ class MotorManager:
         self.__motorConfigs = {}
         self.__motorControls = {}
         self.__motorStatuses = {}
-        self.__controlPublisher = rospy.Publisher('MotorControl', Motor_Control)
-        self.__configPublisher = rospy.Publisher('MotorConfiguration', Motor_Configuration)
+        self.__controlPublisher = rospy.Publisher(name='MotorControl', data_class=Motor_Control, queue_size=50, tcp_nodelay=True)
+        self.__configPublisher = rospy.Publisher(name='MotorConfiguration', data_class=Motor_Configuration, queue_size=50, tcp_nodelay=True)
         self.__mutex = Lock()
         x = Thread(target=self.__motorMasterLoop)
         rospy.Subscriber("/MotorStatus", Motor_Status, self.__receive_motor_status)
