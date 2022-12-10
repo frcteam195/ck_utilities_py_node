@@ -34,7 +34,7 @@ class Joystick:
     def update(cls, msg : Joystick_Status):
         with cls.mutex:
             for joystick in msg.joysticks:
-                cls.joystick_map[joystick.id] = joystick
+                cls.joystick_map[joystick.index] = joystick
 
     def getRawAxis(self, axisID : int) -> int:
         if self.__id in self.joystick_map:
