@@ -42,7 +42,7 @@ class Joystick:
                 return self.joystick_map[self.__id].axes[axisID]
         return 0
 
-    def getFilteredAxis(self, axisID : int, deadband : int) -> int:
+    def getFilteredAxis(self, axisID : int, deadband : float) -> float:
         return normalizeWithDeadband(self.getRawAxis(axisID), deadband)
 
     def getAxisActuated(self, axisID : int, threshold : float) -> bool:
