@@ -2,7 +2,7 @@
 
 from typing import List
 import rospy
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from threading import Thread, Lock
 from rio_control_node.msg import LED_Control, LED_Control_Data, LED_Color, LED_Animation, RGBW_Color
 from enum import Enum
@@ -78,11 +78,11 @@ class LEDControl:
     vbat_duty_cycle : float = 0
     led_control_mode : LEDControlMode = LEDControlMode.Static
     color : LEDColor = LEDColor(RGBWColor(0, 0, 0, 0), 0, 0)
-    animation : List[LEDAnimation] = {}
+    animation : List[LEDAnimation] = field(default_factory=list) 
 
 class LEDManager:
     def __init__(self):
-        self.__ledControls : List[LEDControl] = {}
+        self.__ledControls : List[LEDControl] = []
         self.__controlPublisher = rospy.Publisher(name='LEDControl', data_class=LED_Control, queue_size=50, tcp_nodelay=True)
         self.__mutex = Lock()
         x = Thread(target=self.__ledMasterLoop)
