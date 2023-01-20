@@ -82,7 +82,7 @@ class LEDControl:
 
 class LEDManager:
     def __init__(self):
-        self.__ledControls : List[LEDControl] = []
+        self.__ledControls : dict[int, LEDControl] = {}
         self.__controlPublisher = rospy.Publisher(name='LEDControl', data_class=LED_Control, queue_size=50, tcp_nodelay=True)
         self.__mutex = Lock()
         x = Thread(target=self.__ledMasterLoop)
@@ -92,11 +92,11 @@ class LEDManager:
     def __create_led_control_dictionary(ledId : int, ledControl : LEDControl):
         ledControlMsg = LED_Control_Data()
         ledControlMsg.id = ledId
-        ledControlMsg.can_network = int(ledControl.can_network)
-        ledControlMsg.led_strip_type = int(ledControl.led_type)
-        ledControlMsg.vbat_config = int(ledControl.vbat_config)
+        ledControlMsg.can_network = ledControl.can_network.value
+        ledControlMsg.led_strip_type = ledControl.led_type.value
+        ledControlMsg.vbat_config = ledControl.vbat_config.value
         ledControlMsg.vbat_duty_cycle = float(ledControl.vbat_duty_cycle)
-        ledControlMsg.led_control_mode = int(ledControl.led_control_mode)
+        ledControlMsg.led_control_mode = ledControl.led_control_mode.value
         ledControlMsg.color = LED_Color()
         ledControlMsg.color.rgbw_color = RGBW_Color()
         ledControlMsg.color.rgbw_color.R = int(ledControl.color.rgbw_color.R)
@@ -116,8 +116,8 @@ class LEDManager:
             ros_animation.color.G = a.color.G
             ros_animation.color.B = a.color.B
             ros_animation.color.W = a.color.W
-            ros_animation.animation_type = int(a.animation_type)
-            ros_animation.direction = int(a.direction)
+            ros_animation.animation_type = a.animation_type.value
+            ros_animation.direction = a.direction.value
             ros_animation.offset = a.offset
             ros_animation.slot = a.slot
             ledControlMsg.animation.append(ros_animation)
@@ -127,7 +127,7 @@ class LEDManager:
         controlMessage = LED_Control()
         controlMessage.led_control = []
         for led in self.__ledControls:
-            controlMessage.led_control.append(self.__create_led_control_dictionary(led.id, led))
+            controlMessage.led_control.append(self.__create_led_control_dictionary(self.__ledControls[led].id, self.__ledControls[led]))
         self.__controlPublisher.publish(controlMessage)
 
     def __set_led_now(self, ledId : int, outputControl : LEDControl):
@@ -154,6 +154,8 @@ class LEDStrip:
 
     def __init__(self, id : int, type : LEDStripType):
         self.__ledControl : LEDControl = LEDControl()
+        self.__ledControl.id = id
+        self.__ledControl.led_type = type
         self.spawn_motor_manager()
 
     @classmethod
