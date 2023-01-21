@@ -17,7 +17,7 @@
   <depend>roscpp</depend>
   <depend>rospy</depend>
   <depend>std_msgs</depend>
-  <depend>rio_control_node</depend>
+  <depend>ck_ros_base_msgs_node</depend>
 
   <test_depend>rostest</test_depend>
 </package>

@@ -4,7 +4,7 @@ from typing import List
 import rospy
 from dataclasses import dataclass, field
 from threading import Thread, Lock
-from rio_control_node.msg import LED_Control, LED_Control_Data, LED_Color, LED_Animation, RGBW_Color
+from ck_ros_base_msgs_node.msg import LED_Control, LED_Control_Data, LED_Color, LED_Animation, RGBW_Color
 from enum import Enum
 
 @dataclass
@@ -78,7 +78,7 @@ class LEDControl:
     vbat_duty_cycle : float = 0
     led_control_mode : LEDControlMode = LEDControlMode.Static
     color : LEDColor = LEDColor(RGBWColor(0, 0, 0, 0), 0, 0)
-    animation : List[LEDAnimation] = field(default_factory=list) 
+    animation : List[LEDAnimation] = field(default_factory=list)
 
 class LEDManager:
     def __init__(self):
@@ -179,7 +179,7 @@ class LEDStrip:
     def setLEDControlMode(self, mode : LEDControlMode):
         self.__ledControl.led_control_mode = mode
         self.__update()
-        
+
     def setLEDColor(self, color : LEDColor):
         self.__ledControl.color = color
         self.__update()

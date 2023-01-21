@@ -2,7 +2,7 @@ import rospy
 from dataclasses import dataclass
 from threading import Thread, Lock
 from enum import Enum
-from rio_control_node.msg import Joystick_Status
+from ck_ros_base_msgs_node.msg import Joystick_Status
 from ck_utilities_py_node.ckmath import *
 
 def MAX_NUM_JOYSTICKS() -> int :

@@ -3,12 +3,12 @@
 import rospy
 from dataclasses import dataclass
 from threading import Thread, Lock
-from rio_control_node.msg import Motor_Status
-from rio_control_node.msg import Motor_Control
-from rio_control_node.msg import Motor_Configuration
-from rio_control_node.msg import Motor_Config
-import rio_control_node.msg
-from rio_control_node.msg import Current_Limit_Configuration
+from ck_ros_base_msgs_node.msg import Motor_Status
+from ck_ros_base_msgs_node.msg import Motor_Control
+from ck_ros_base_msgs_node.msg import Motor_Configuration
+from ck_ros_base_msgs_node.msg import Motor_Config
+import ck_ros_base_msgs_node.msg
+from ck_ros_base_msgs_node.msg import Current_Limit_Configuration
 from enum import Enum
 
 class NeutralMode(Enum):
@@ -138,7 +138,7 @@ class MotorManager:
 
     @staticmethod
     def __create_motor_control_dictionary(motorId : int, motorControl : OutputControl):
-        motorControlMsg = rio_control_node.msg.Motor()
+        motorControlMsg = ck_ros_base_msgs_node.msg.Motor()
         motorControlMsg.id = motorId
         motorControlMsg.controller_type = motorControl.type.value
         motorControlMsg.control_mode = motorControl.controlMode.value

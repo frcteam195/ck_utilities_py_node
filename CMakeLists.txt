@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.8)
 project(ck_utilities_py_node)
 
-find_package(catkin REQUIRED COMPONENTS message_generation roscpp rospy rio_control_node std_msgs)
+find_package(catkin REQUIRED COMPONENTS message_generation roscpp rospy ck_ros_base_msgs_node std_msgs)
 
 # add_message_files(
 #   FILES
@@ -18,7 +18,7 @@ find_package(catkin REQUIRED COMPONENTS message_generation roscpp rospy rio_cont
 # )
 
 catkin_package(
-  CATKIN_DEPENDS message_runtime roscpp rospy std_msgs rio_control_node
+  CATKIN_DEPENDS message_runtime roscpp rospy std_msgs ck_ros_base_msgs_node
 )
 
 # include_directories(include ${catkin_INCLUDE_DIRS})
