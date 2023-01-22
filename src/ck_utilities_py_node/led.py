@@ -78,7 +78,7 @@ class LEDControl:
     vbat_duty_cycle : float = 0
     led_control_mode : LEDControlMode = LEDControlMode.Static
     color : LEDColor = LEDColor(RGBWColor(0, 0, 0, 0), 0, 0)
-    animation : List[LEDAnimation] = field(default_factory=list)
+    animations : List[LEDAnimation] = field(default_factory=list)
 
 class LEDManager:
     def __init__(self):
@@ -105,7 +105,7 @@ class LEDManager:
         ledControlMsg.color.rgbw_color.W = int(ledControl.color.rgbw_color.W)
         ledControlMsg.color.num_leds = int(ledControl.color.num_leds)
         ledControlMsg.color.start_index = int(ledControl.color.start_index)
-        for a in ledControl.animation:
+        for a in ledControl.animations:
             ros_animation = LED_Animation()
             ros_animation.index = a.index
             ros_animation.brightness = a.brightness
@@ -120,7 +120,7 @@ class LEDManager:
             ros_animation.direction = a.direction.value
             ros_animation.offset = a.offset
             ros_animation.slot = a.slot
-            ledControlMsg.animation.append(ros_animation)
+            ledControlMsg.animations.append(ros_animation)
         return ledControlMsg
 
     def __transmit_led_controls(self):
@@ -184,6 +184,6 @@ class LEDStrip:
         self.__ledControl.color = color
         self.__update()
 
-    def setLEDAnimation(self, animation : LEDAnimation):
-        self.__ledControl.animation = animation
+    def setLEDAnimations(self, animations : LEDAnimation):
+        self.__ledControl.animations = animations
         self.__update()
