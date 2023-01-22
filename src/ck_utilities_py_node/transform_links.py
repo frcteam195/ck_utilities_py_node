@@ -12,8 +12,6 @@ class TransformManager:
 
     __static_transform_list = None
 
-    rospy.logerr("Starting a transform manager")
-
     def __init__(self):
         self.__class__.__static_transform_publisher = tf2_ros.StaticTransformBroadcaster()
         self.__class__.__dynamic_transform_publisher = tf2_ros.TransformBroadcaster()
@@ -34,10 +32,10 @@ class TransformBase:
         self.__transform : Transform()
         self.__base_frame : str = base_frame
         self.__name : str = name
-        self.spawn_motor_manager()
+        self.spawn_transform_manager()
 
     @classmethod
-    def spawn_motor_manager(cls):
+    def spawn_transform_manager(cls):
         with cls.__mutex:
             if cls.__manager is None:
                 cls.__manager = TransformManager()

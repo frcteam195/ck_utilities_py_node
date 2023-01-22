@@ -20,7 +20,6 @@ class RotationQuaternion:
     z : float = 0
     w : float = 1
 
-@dataclass
 class Pose:
     position : Translation
     orientation : Rotation
@@ -30,12 +29,14 @@ class Transform:
         self.linear = Translation()
         self.angular = Rotation()
 
+class Scale:
+    def __init__(self):
+        self.x : float = 1
+        self.y : float = 1
+        self.z : float = 1
+
 @dataclass
 class Twist:
     linear : Translation
     angular : Rotation
 
-@dataclass
-class TransformLink:
-    base_frame : str
-    translation : Transform
