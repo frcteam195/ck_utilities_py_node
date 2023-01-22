@@ -184,6 +184,6 @@ class LEDStrip:
         self.__ledControl.color = color
         self.__update()
 
-    def setLEDAnimations(self, animations : LEDAnimation):
+    def setLEDAnimations(self, animations : List[LEDAnimation]):
         self.__ledControl.animations = animations
         self.__update()
