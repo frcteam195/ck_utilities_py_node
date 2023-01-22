@@ -83,7 +83,7 @@ class LEDControl:
 class LEDManager:
     def __init__(self):
         self.__ledControls : dict[int, LEDControl] = {}
-        self.__controlPublisher = rospy.Publisher(name='LEDControl', data_class=LED_Control, queue_size=50, tcp_nodelay=True)
+        self.__controlPublisher = rospy.Publisher(name='RioLedControl', data_class=LED_Control, queue_size=50, tcp_nodelay=True)
         self.__mutex = Lock()
         x = Thread(target=self.__ledMasterLoop)
         x.start()
