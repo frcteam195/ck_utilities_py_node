@@ -35,8 +35,7 @@ class VBATConfigType(Enum):
 
 class LEDControlMode(Enum):
     Static = 0
-    Blinking = 1
-    Animated = 2
+    Animated = 1
 
 class AnimationType(Enum):
     ColorFlow = 0
@@ -47,6 +46,7 @@ class AnimationType(Enum):
     SingleFade = 5
     Twinkle = 6
     TwinkleOff = 7
+    Strobe = 8
 
 class Direction(Enum):
     Forward = 0
