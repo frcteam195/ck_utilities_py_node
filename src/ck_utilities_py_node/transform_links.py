@@ -12,6 +12,20 @@ class TransformManager:
 
     __static_transform_list = None
 
+    __mutex = Lock()
+    __manager = None
+
+    @classmethod
+    def init_manager(cls):
+        with cls.__mutex:
+            if cls.__manager is None:
+                cls.__manager = TransformManager()
+
+    @classmethod
+    def manager(cls):
+        with cls.__mutex:
+            return cls.__manager
+
     def __init__(self):
         self.__class__.__static_transform_publisher = tf2_ros.StaticTransformBroadcaster()
         self.__class__.__dynamic_transform_publisher = tf2_ros.TransformBroadcaster()
@@ -25,9 +39,6 @@ class TransformManager:
         self.__class__.__dynamic_transform_publisher.sendTransform(transform)
 
 class TransformBase:
-    __mutex = Lock()
-    __manager = None
-
     def __init__(self, name : str, base_frame : str):
         self.__transform : Transform()
         self.__base_frame : str = base_frame
@@ -36,12 +47,14 @@ class TransformBase:
 
     @classmethod
     def spawn_transform_manager(cls):
-        with cls.__mutex:
-            if cls.__manager is None:
-                cls.__manager = TransformManager()
+        TransformManager.init_manager()
 
     def set_transform(self, transform : Transform):
         self.__transform = transform
+
+    @classmethod
+    def manager(cls) -> TransformManager:
+        return TransformManager.manager()
 
     def convert_to_tf2_msg(self):
         tf2_transform = geometry_msgs.msg.TransformStamped()
@@ -60,11 +73,6 @@ class TransformBase:
         tf2_transform.transform.rotation.z = quat[2]
         tf2_transform.transform.rotation.w = quat[3]
         return tf2_transform
-
-    @classmethod
-    def manager(cls) -> TransformManager:
-        return cls.__manager
-
 
 class TransformLink(TransformBase):
     def __init__(self, name : str, base_frame : str):

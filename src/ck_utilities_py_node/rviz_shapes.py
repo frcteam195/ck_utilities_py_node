@@ -18,6 +18,21 @@ class ShapeManager:
 
     __static_shape_map = None
 
+    __mutex = Lock()
+    __manager = None
+
+    @classmethod
+    def init_manager(cls):
+        with cls.__mutex:
+            if cls.__manager is None:
+                cls.__manager = ShapeManager()
+
+    @classmethod
+    def manager(cls):
+        with cls.__mutex:
+            return cls.__manager
+
+
     def __init__(self):
         self.__class__.__static_shape_publisher = rospy.Publisher(
             name = "/static_shapes", data_class=MarkerArray, queue_size=1, tcp_nodelay=True, latch=True)
@@ -32,17 +47,12 @@ class ShapeManager:
         for transmit_marker_key, transmit_marker in self.__class__.__static_shape_map.items():
             transmit_array.markers.append(transmit_marker)
 
-        # rospy.loginfo(self.__class__.__static_shape_map)
-        # rospy.loginfo(transmit_array)
-
         self.__class__.__static_shape_publisher.publish(transmit_array)
 
     def publish_dynamic_shape(self, marker : Marker):
         self.__class__.__dynamic_shape_publisher.publish(marker)
 
 class ShapeBase:
-    __mutex = Lock()
-    __manager = None
 
     def __init__(self, namespace : str, id : int, base_frame : str, type : int):
         self.__transform = Transform()
@@ -50,15 +60,17 @@ class ShapeBase:
         self.__namespace = namespace
         self.__id = id
         self.__type = type
-        self.__scale = Scale()
+        self.__scale = Scale(1.0, 1.0, 1.0)
         self.__color = Color(1.0, 1.0, 1.0, 1.0)
         self.spawn_shape_manager()
 
     @classmethod
     def spawn_shape_manager(cls):
-        with cls.__mutex:
-            if cls.__manager is None:
-                cls.__manager = ShapeManager()
+        ShapeManager.init_manager()
+
+    @classmethod
+    def manager(cls) -> ShapeManager:
+        return ShapeManager.manager()
 
     def set_transform(self, transform : Transform):
         self.__transform = transform
@@ -98,10 +110,20 @@ class ShapeBase:
         marker.frame_locked = True
         return marker
 
-    @classmethod
-    def manager(cls) -> ShapeManager:
-        return cls.__manager
 
+class Cube(ShapeBase):
+    def __init__(self, namespace : str, id : int, base_frame : str):
+        super().__init__(namespace, id, base_frame, 1)
+
+    def publish(self):
+        self.manager().publish_dynamic_shape(self.convert_to_marker())
+
+class StaticCube(ShapeBase):
+    def __init__(self, namespace : str, id : int, base_frame : str):
+        super().__init__(namespace, id, base_frame, 1)
+
+    def publish(self):
+        self.manager().publish_static_shape(self.convert_to_marker())
 class Sphere(ShapeBase):
     def __init__(self, namespace : str, id : int, base_frame : str):
         super().__init__(namespace, id, base_frame, 2)
@@ -112,6 +134,20 @@ class Sphere(ShapeBase):
 class StaticSphere(ShapeBase):
     def __init__(self, namespace : str, id : int, base_frame : str):
         super().__init__(namespace, id, base_frame, 2)
+
+    def publish(self):
+        self.manager().publish_static_shape(self.convert_to_marker())
+
+class Cylinder(ShapeBase):
+    def __init__(self, namespace : str, id : int, base_frame : str):
+        super().__init__(namespace, id, base_frame, 3)
+
+    def publish(self):
+        self.manager().publish_dynamic_shape(self.convert_to_marker())
+
+class StaticCylinder(ShapeBase):
+    def __init__(self, namespace : str, id : int, base_frame : str):
+        super().__init__(namespace, id, base_frame, 3)
 
     def publish(self):
         self.manager().publish_static_shape(self.convert_to_marker())

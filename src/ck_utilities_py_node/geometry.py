@@ -30,10 +30,10 @@ class Transform:
         self.angular = Rotation()
 
 class Scale:
-    def __init__(self):
-        self.x : float = 1
-        self.y : float = 1
-        self.z : float = 1
+    def __init__(self, x : float, y : float, z : float):
+        self.x : float = x
+        self.y : float = y
+        self.z : float = z
 
 @dataclass
 class Twist:
