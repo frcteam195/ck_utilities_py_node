@@ -133,7 +133,7 @@ class LEDManager:
     def __set_led_now(self, ledId : int, outputControl : LEDControl):
         controlMessage = LED_Control()
         controlMessage.led_control = []
-        controlMessage.led_control.append(self.__create_led_control_dictionary(ledId, self.__ledControls[ledId]))
+        controlMessage.led_control.append(self.__create_led_control_dictionary(ledId, outputControl))
         self.__controlPublisher.publish(controlMessage)
 
     def update_led_control(self, ledId : int, outputControl : LEDControl):
@@ -156,10 +156,10 @@ class LEDStrip:
         self.__ledControl : LEDControl = LEDControl()
         self.__ledControl.id = id
         self.__ledControl.led_type = type
-        self.spawn_motor_manager()
+        self.spawn_led_manager()
 
     @classmethod
-    def spawn_motor_manager(cls):
+    def spawn_led_manager(cls):
         with cls.mutex:
             if cls.manager is None:
                 cls.manager = LEDManager()
