@@ -14,7 +14,6 @@ class Color:
 
 class ShapeManager:
     __static_shape_publisher = None
-    __dynamic_shape_publisher = None
 
     __static_shape_map = None
 
@@ -32,12 +31,9 @@ class ShapeManager:
         with cls.__mutex:
             return cls.__manager
 
-
     def __init__(self):
         self.__class__.__static_shape_publisher = rospy.Publisher(
             name = "/static_shapes", data_class=MarkerArray, queue_size=1, tcp_nodelay=True, latch=True)
-        self.__class__.__dynamic_shape_publisher = rospy.Publisher(
-            name = "/shapes", data_class=Marker, queue_size=100, tcp_nodelay=True)
         self.__class__.__static_shape_map = {}
 
     def publish_static_shape(self, marker : Marker):
@@ -48,9 +44,6 @@ class ShapeManager:
             transmit_array.markers.append(transmit_marker)
 
         self.__class__.__static_shape_publisher.publish(transmit_array)
-
-    def publish_dynamic_shape(self, marker : Marker):
-        self.__class__.__dynamic_shape_publisher.publish(marker)
 
 class ShapeBase:
 
@@ -110,28 +103,14 @@ class ShapeBase:
         marker.frame_locked = True
         return marker
 
-
 class Cube(ShapeBase):
     def __init__(self, namespace : str, id : int, base_frame : str):
         super().__init__(namespace, id, base_frame, 1)
 
     def publish(self):
-        self.manager().publish_dynamic_shape(self.convert_to_marker())
-
-class StaticCube(ShapeBase):
-    def __init__(self, namespace : str, id : int, base_frame : str):
-        super().__init__(namespace, id, base_frame, 1)
-
-    def publish(self):
         self.manager().publish_static_shape(self.convert_to_marker())
+
 class Sphere(ShapeBase):
-    def __init__(self, namespace : str, id : int, base_frame : str):
-        super().__init__(namespace, id, base_frame, 2)
-
-    def publish(self):
-        self.manager().publish_dynamic_shape(self.convert_to_marker())
-
-class StaticSphere(ShapeBase):
     def __init__(self, namespace : str, id : int, base_frame : str):
         super().__init__(namespace, id, base_frame, 2)
 
@@ -139,13 +118,6 @@ class StaticSphere(ShapeBase):
         self.manager().publish_static_shape(self.convert_to_marker())
 
 class Cylinder(ShapeBase):
-    def __init__(self, namespace : str, id : int, base_frame : str):
-        super().__init__(namespace, id, base_frame, 3)
-
-    def publish(self):
-        self.manager().publish_dynamic_shape(self.convert_to_marker())
-
-class StaticCylinder(ShapeBase):
     def __init__(self, namespace : str, id : int, base_frame : str):
         super().__init__(namespace, id, base_frame, 3)
 
