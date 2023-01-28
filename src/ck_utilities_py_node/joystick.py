@@ -69,7 +69,7 @@ class Joystick:
             return retVal
         return False
 
-    def getRisingEdgeButton(self, buttonID : int) -> bool:
+    def getFallingEdgeButton(self, buttonID : int) -> bool:
         if buttonID < MAX_NUM_BUTTONS():
             currVal = False
             if self.__id in self.joystick_map:
