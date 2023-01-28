@@ -83,7 +83,7 @@ class ShapeBase:
 
     def convert_to_marker(self):
         marker = Marker()
-        marker.header.stamp = rospy.Time.now()
+        marker.header.stamp = rospy.Time.from_sec(0)
         marker.header.frame_id = self.__base_frame
         marker.action = Marker.ADD
         marker.ns = self.__namespace
