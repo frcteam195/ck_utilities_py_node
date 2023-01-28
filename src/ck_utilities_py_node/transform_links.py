@@ -58,7 +58,7 @@ class TransformBase:
 
     def convert_to_tf2_msg(self):
         tf2_transform = geometry_msgs.msg.TransformStamped()
-        tf2_transform.header.stamp = rospy.Time.now()
+        tf2_transform.header.stamp = rospy.Time.from_sec(0)
         tf2_transform.header.frame_id = self.__base_frame
         tf2_transform.child_frame_id = self.__name
         tf2_transform.transform.translation.x = self.__transform.linear.x
