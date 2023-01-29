@@ -78,6 +78,7 @@ class Solenoid:
         self.__solenoidControl : SolenoidControl = SolenoidControl()
         self.__solenoidControl.id = id
         self.__solenoidControl.type = type
+        self.__solenoidControl.output = SolenoidState.OFF
         self.__spawn_solenoid_manager()
 
     @classmethod
