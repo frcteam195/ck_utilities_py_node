@@ -78,10 +78,10 @@ class Solenoid:
         self.__solenoidControl : SolenoidControl = SolenoidControl()
         self.__solenoidControl.id = id
         self.__solenoidControl.type = type
-        self.spawn_solenoid_manager()
+        self.__spawn_solenoid_manager()
 
     @classmethod
-    def spawn_solenoid_manager(cls):
+    def __spawn_solenoid_manager(cls):
         with cls.mutex:
             if cls.manager is None:
                 cls.manager = SolenoidManager()
@@ -90,6 +90,6 @@ class Solenoid:
         with self.__class__.mutex:
             self.__class__.manager.update_solenoid_control(self.__solenoidControl.id, self.__solenoidControl)
 
-    def setLEDAnimation(self, output : SolenoidState):
+    def set(self, output : SolenoidState):
         self.__solenoidControl.output = output
         self.__update()
