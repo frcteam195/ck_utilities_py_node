@@ -1,10 +1,17 @@
+"""
+A helper to load parameters from the ROS parameter server more easily.
+
+Author: Robert Hilton (robert.a.hilton.jr@gmail.com), Team 195
+"""
+
 import rospy
-from typing import Any, List
+from typing import Any
 import inspect
 import dataclasses
 
-def parameter_exists(parameter : str) -> bool:
+def __parameter_exists__(parameter : str) -> bool:
     return rospy.has_param(param_name="/" + rospy.get_name() + "/" + parameter)
+
 
 def __load_paramter__(parameter : str, default_value : Any = None, exception_on_failure : bool = True) -> Any:
     """Checks if a parameter exists on the server and loads it if available, otherwise throws an exception.
@@ -24,7 +31,7 @@ def __load_paramter__(parameter : str, default_value : Any = None, exception_on_
         Any type that is returned from the parameter server or potentially None on failure
     """
 
-    if not parameter_exists(parameter):
+    if not __parameter_exists__(parameter):
         if (exception_on_failure):
             raise Exception("Missing parameter definition for: " + parameter)
         return default_value
@@ -34,15 +41,6 @@ def __load_paramter__(parameter : str, default_value : Any = None, exception_on_
         else:
             return rospy.get_param(param_name=rospy.get_name() + "/" + parameter)
 
-# def load_parameter_list(parameter_list : List[str], storage_class : Any):
-#     for param_string in parameter_list:
-#         if not parameter_exists(param_string):
-#             raise Exception("Missing parameter definition for: " + param_string)
-
-#         if (not hasattr(storage_class, param_string)):
-#             raise Exception("Missing storage class definition for: " + param_string)
-
-#         setattr(storage_class, param_string, __load_paramter__(param_string))
 
 def load_parameter_class(storage_class_obj : Any) -> None:
     """Loads data into a dataclass object from the parameter server. Class field names must match parameter names exactly.
