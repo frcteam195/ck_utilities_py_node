@@ -11,7 +11,7 @@ class Translation:
         elif isinstance(input_type, geometry_msgs.msg._Vector3.Vector3):
             self.__init_from_translation(input_type)
             return
-        elif isinstance(input_type, geometry_msgs.msg._Point.Point)
+        elif isinstance(input_type, geometry_msgs.msg._Point.Point):
             self.__init_from_point(input_type)
         raise ValueError("Type " + str(type(input_type)) + "is not supported by Translation constructor")
 
@@ -21,7 +21,7 @@ class Translation:
         self.y = input_translation.y
         self.z = input_translation.z
 
-    def __init_from_point(self, input_point : geometry_msgs.msg._Point.Point)
+    def __init_from_point(self, input_point : geometry_msgs.msg._Point.Point):
         self.__translation = numpy.zeros(3)
         self.x = input_point.x
         self.y = input_point.y
