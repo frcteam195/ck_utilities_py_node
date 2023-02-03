@@ -109,28 +109,28 @@ class RotationQuaternion:
     @property
     def x(self) -> float:
         return self.__rotation[0,0]
-    @x.getter
+    @x.setter
     def x(self, value : float):
         self.__rotation[0,0] = value
 
     @property
     def y(self) -> float:
         return self.__rotation[1,1]
-    @y.getter
+    @y.setter
     def y(self, value : float):
         self.__rotation[1,1] = value
 
     @property
     def z(self) -> float:
         return self.__rotation[2,2]
-    @z.getter
+    @z.setter
     def z(self, value : float):
         self.__rotation[2,2] = value
 
     @property
     def w(self) -> float:
         return self.__rotation[3,3]
-    @w.getter
+    @w.setter
     def w(self, value : float):
         self.__rotation[3,3] = value
 
@@ -152,14 +152,14 @@ class Pose:
     @property
     def position(self) -> Translation:
         return self.__position
-    @position.getter
+    @position.setter
     def position(self, value : Translation):
         self.__position = value
 
     @property
     def orientation(self) -> Rotation:
         return self.__orientation
-    @orientation.getter
+    @orientation.setter
     def position(self, value : Rotation):
         self.__orientation = value
 
@@ -181,14 +181,14 @@ class Transform:
     @property
     def linear(self) -> Translation:
         return self.__linear
-    @linear.getter
+    @linear.setter
     def linear(self, value : Translation):
         self.__linear = value
 
     @property
     def angular(self) -> Rotation:
         return self.__angular
-    @angular.getter
+    @angular.setter
     def angular(self, value : Rotation):
         self.__angular = value
 
@@ -211,14 +211,14 @@ class Twist:
     @property
     def linear(self) -> Translation:
         return self.__linear
-    @linear.getter
+    @linear.setter
     def linear(self, value : Translation):
         self.__linear = value
 
     @property
     def angular(self) -> Rotation:
         return self.__angular
-    @angular.getter
+    @angular.setter
     def angular(self, value : Rotation):
         self.__angular = value
 
