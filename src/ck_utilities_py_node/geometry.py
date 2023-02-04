@@ -1,7 +1,9 @@
 import numpy
 from geometry_msgs.msg import *
+from nav_msgs.msg import *
+from std_msgs.msg import *
 from tf.transformations import *
-import nav_msgs.msg
+
 
 class Translation:
 
@@ -49,6 +51,20 @@ class Translation:
     def z(self, value):
         self.__translation[2] = value
 
+    def to_msg(self) -> geometry_msgs.msg._Vector3.Vector3:
+        output = geometry_msgs.msg._Vector3.Vector3()
+        output.x = self.x()
+        output.y = self.y()
+        output.z = self.z()
+        return output
+
+    def to_msg_point(self) -> geometry_msgs.msg._Point.Point:
+        output = geometry_msgs.msg._Point.Point()
+        output.x = self.x()
+        output.y = self.y()
+        output.z = self.z()
+        return output
+
 class Rotation:
 
     def __init__(self, input_type = None):
@@ -88,6 +104,23 @@ class Rotation:
     @yaw.setter
     def yaw(self, value : float):
         self.__rotation[2] = value
+
+    def to_msg(self) -> geometry_msgs.msg._Vector3.Vector3:
+        output = geometry_msgs.msg._Vector3.Vector3()
+        output.x = self.roll()
+        output.y = self.pitch()
+        output.z = self.yaw()
+        return output
+
+    def to_msg_quat(self) -> geometry_msgs.msg._Quaternion.Quaternion:
+        output = geometry_msgs.msg._Quaternion.Quaternion()
+        eulers = ([self.roll(), self.pitch(), self.yaw()])
+        quats = quaternion_from_euler(eulers)
+        output.x = quats[0]
+        output.y = quats[1]
+        output.z = quats[2]
+        output.w = quats[3]
+        return output
 
 class RotationQuaternion:
 
@@ -164,6 +197,12 @@ class Pose:
     def position(self, value : Rotation):
         self.__orientation = value
 
+    def to_msg(self) -> geometry_msgs.msg._Pose.Pose:
+        output = geometry_msgs.msg._Pose.Pose()
+        output.position = self.__position.to_msg_point()
+        output.orientation = self.__orientation.to_msg_quat()
+        return output
+
 class Transform:
     def __init__(self, input_type = None):
         if input_type is None:
@@ -193,6 +232,10 @@ class Transform:
     def angular(self, value : Rotation):
         self.__angular = value
 
+    def to_msg(self) -> geometry_msgs.msg._Transform.Transform:
+        output = geometry_msgs.msg._Transform.Transform()
+        output.translation = self.__linear.to_msg()
+        output.rotation = self.__angular.to_msg_quat()
 
 class Twist:
     def __init__(self, input_type = None):
@@ -223,6 +266,11 @@ class Twist:
     def angular(self, value : Rotation):
         self.__angular = value
 
+    def to_msg(self) -> geometry_msgs.msg._Twist.Twist:
+        output = geometry_msgs.msg._Twist.Twist
+        output.linear = self.__linear.to_msg()
+        output.angular = self.__angular.to_msg()
+        return output
 
 class Scale:
     def __init__(self, x : float, y : float, z : float):
