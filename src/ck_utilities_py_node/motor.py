@@ -4,6 +4,7 @@ import rospy
 from dataclasses import dataclass
 from threading import Thread, Lock
 from ck_ros_base_msgs_node.msg import Motor_Status
+from ck_ros_base_msgs_node.msg import Motor_Info
 from ck_ros_base_msgs_node.msg import Motor_Control
 from ck_ros_base_msgs_node.msg import Motor_Configuration
 from ck_ros_base_msgs_node.msg import Motor_Config
@@ -53,6 +54,78 @@ class ControlMode(Enum):
     MOTION_PROFILE_ARC = 10
     MUSIC_TONE = 13
     DISABLED = 15
+
+@dataclass
+class Faults:
+    BitField : int
+    ###########################
+    UnderVoltage : bool
+    ForwardLimitSwitch : bool
+    ReverseLimitSwitch : bool
+    ForwardSoftLimit : bool
+    ReverseSoftLimit : bool
+    HardwareFailure : bool
+    ResetDuringEn : bool
+    SensorOverflow : bool
+    SensorOutOfPhase : bool
+    HardwareESDReset : bool
+    RemoteLossOfSignal : bool
+    APIError : bool
+    SupplyOverV : bool
+    SupplyUnstable : bool
+    ############################
+
+    def __post_init__(self, BitField : int = 0):
+        self.BitField = BitField
+        self.UnderVoltage =       BitField & 0x00000000000001
+        self.ForwardLimitSwitch = BitField & 0x00000000000010
+        self.ReverseLimitSwitch = BitField & 0x00000000000100
+        self.ForwardSoftLimit =   BitField & 0x00000000001000
+        self.ReverseSoftLimit =   BitField & 0x00000000010000
+        self.HardwareFailure =    BitField & 0x00000000100000
+        self.ResetDuringEn =      BitField & 0x00000001000000
+        self.SensorOverflow =     BitField & 0x00000010000000
+        self.SensorOutOfPhase =   BitField & 0x00000100000000
+        self.HardwareESDReset =   BitField & 0x00001000000000
+        self.RemoteLossOfSignal = BitField & 0x00010000000000
+        self.APIError =           BitField & 0x00100000000000
+        self.SupplyOverV =        BitField & 0x01000000000000
+        self.SupplyUnstable =     BitField & 0x10000000000000
+
+@dataclass
+class StickyFaults:
+    BitField : int
+    ###########################
+    UnderVoltage : bool
+    ForwardLimitSwitch : bool
+    ReverseLimitSwitch : bool
+    ForwardSoftLimit : bool
+    ReverseSoftLimit : bool
+    ResetDuringEn : bool
+    SensorOverflow : bool
+    SensorOutOfPhase : bool
+    HardwareESDReset : bool
+    RemoteLossOfSignal : bool
+    APIError : bool
+    SupplyOverV : bool
+    SupplyUnstable : bool
+    ############################
+
+    def __post_init__(self, BitField : int = 0):
+        self.BitField = BitField
+        self.UnderVoltage =       BitField & 0x0000000000001
+        self.ForwardLimitSwitch = BitField & 0x0000000000010
+        self.ReverseLimitSwitch = BitField & 0x0000000000100
+        self.ForwardSoftLimit =   BitField & 0x0000000001000
+        self.ReverseSoftLimit =   BitField & 0x0000000010000
+        self.ResetDuringEn =      BitField & 0x0000000100000
+        self.SensorOverflow =     BitField & 0x0000001000000
+        self.SensorOutOfPhase =   BitField & 0x0000010000000
+        self.HardwareESDReset =   BitField & 0x0000100000000
+        self.RemoteLossOfSignal = BitField & 0x0001000000000
+        self.APIError =           BitField & 0x0010000000000
+        self.SupplyOverV =        BitField & 0x0100000000000
+        self.SupplyUnstable =     BitField & 0x1000000000000
 
 @dataclass
 class OutputControl:
@@ -484,6 +557,18 @@ class Motor:
         if status is not None:
             return status.raw_output_percent
         return 0.0
+    
+    def get_faults(self) -> Faults:
+        status : Motor_Info = self.__get_status()
+        if status is not None:
+            return Faults(status.faults)
+        return Faults()
+    
+    def get_sticky_faults(self) -> StickyFaults:
+        status : Motor_Info = self.__get_status()
+        if status is not None:
+            return StickyFaults(status.sticky_faults)
+        return StickyFaults()
 
     def __ros_motor_config_validation(self, motor_string):
         config_strings = {
