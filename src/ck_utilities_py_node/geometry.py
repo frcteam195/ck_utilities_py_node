@@ -1,6 +1,7 @@
 import numpy
 from geometry_msgs.msg import *
 from tf.transformations import *
+import nav_msgs.msg
 
 class Translation:
 
@@ -228,3 +229,55 @@ class Scale:
         self.x : float = x
         self.y : float = y
         self.z : float = z
+
+class Covariance:
+    def __init__(self):
+        self.__covariance = numpy.zeros(6, 6)
+
+    @property
+    def x_var(self) -> float:
+        return self.__covariance[0,0]
+    @x_var.setter
+    def x_var(self, value : float):
+        self.__covariance[0,0] = value
+
+    @property
+    def y_var(self) -> float:
+        return self.__covariance[1,1]
+    @y_var.setter
+    def y_var(self, value : float):
+        self.__covariance[1,1] = value
+
+    @property
+    def z_var(self) -> float:
+        return self.__covariance[2,2]
+    @z_var.setter
+    def z_var(self, value : float):
+        self.__covariance[2,2] = value
+
+    @property
+    def roll_var(self) -> float:
+        return self.__covariance[3,3]
+    @roll_var.setter
+    def roll_var(self, value : float):
+        self.__covariance[3,3] = value
+
+    @property
+    def yaw_var(self) -> float:
+        return self.__covariance[4,4]
+    @yaw_var.setter
+    def yaw_var(self, value : float):
+        self.__covariance[4,4] = value
+
+    @property
+    def pitch_var(self) -> float:
+        return self.__covariance[5,5]
+    @pitch_var.setter
+    def pitch_var(self, value : float):
+        self.__covariance[5,5] = value
+
+    def to_msg(self) -> std_msgs.msg.Float64[36]:
+        output = []
+        for i in self.__covariance:
+            output.append(i)
+        return output
