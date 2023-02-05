@@ -13,7 +13,7 @@ def __parameter_exists__(parameter : str) -> bool:
     return rospy.has_param(param_name="/" + rospy.get_name() + "/" + parameter)
 
 
-def __load_paramter__(parameter : str, default_value : Any = None, exception_on_failure : bool = True) -> Any:
+def __load_parameter__(parameter : str, default_value : Any = None, exception_on_failure : bool = True) -> Any:
     """Checks if a parameter exists on the server and loads it if available, otherwise throws an exception.
 
     Parameters
@@ -59,4 +59,4 @@ def load_parameter_class(storage_class_obj : Any) -> None:
 
     for m in inspect.getmembers(storage_class_obj):
         if not m[0].startswith('_') and not inspect.ismethod(m[1]):
-            setattr(storage_class_obj, m[0], __load_paramter__(m[0]))
+            setattr(storage_class_obj, m[0], __load_parameter__(m[0]))
