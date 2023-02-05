@@ -324,7 +324,7 @@ class Covariance:
     def pitch_var(self, value : float):
         self.__covariance[5,5] = value
 
-    def to_msg(self) -> std_msgs.msg.Float64[36]:
+    def to_msg(self):
         output = []
         for i in self.__covariance:
             output.append(i)
