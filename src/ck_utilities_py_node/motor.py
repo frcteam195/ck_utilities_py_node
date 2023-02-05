@@ -57,22 +57,22 @@ class ControlMode(Enum):
 
 @dataclass
 class Faults:
-    BitField : int
+    BitField : int = 0
     ###########################
-    UnderVoltage : bool
-    ForwardLimitSwitch : bool
-    ReverseLimitSwitch : bool
-    ForwardSoftLimit : bool
-    ReverseSoftLimit : bool
-    HardwareFailure : bool
-    ResetDuringEn : bool
-    SensorOverflow : bool
-    SensorOutOfPhase : bool
-    HardwareESDReset : bool
-    RemoteLossOfSignal : bool
-    APIError : bool
-    SupplyOverV : bool
-    SupplyUnstable : bool
+    UnderVoltage : bool = False
+    ForwardLimitSwitch : bool = False
+    ReverseLimitSwitch : bool = False
+    ForwardSoftLimit : bool = False
+    ReverseSoftLimit : bool = False
+    HardwareFailure : bool = False
+    ResetDuringEn : bool = False
+    SensorOverflow : bool = False
+    SensorOutOfPhase : bool = False
+    HardwareESDReset : bool = False
+    RemoteLossOfSignal : bool = False
+    APIError : bool = False
+    SupplyOverV : bool = False
+    SupplyUnstable : bool = False
     ############################
 
     def __post_init__(self, BitField : int = 0):
@@ -94,21 +94,21 @@ class Faults:
 
 @dataclass
 class StickyFaults:
-    BitField : int
+    BitField : int = 0
     ###########################
-    UnderVoltage : bool
-    ForwardLimitSwitch : bool
-    ReverseLimitSwitch : bool
-    ForwardSoftLimit : bool
-    ReverseSoftLimit : bool
-    ResetDuringEn : bool
-    SensorOverflow : bool
-    SensorOutOfPhase : bool
-    HardwareESDReset : bool
-    RemoteLossOfSignal : bool
-    APIError : bool
-    SupplyOverV : bool
-    SupplyUnstable : bool
+    UnderVoltage : bool = False
+    ForwardLimitSwitch : bool = False
+    ReverseLimitSwitch : bool = False
+    ForwardSoftLimit : bool = False
+    ReverseSoftLimit : bool = False
+    ResetDuringEn : bool = False
+    SensorOverflow : bool = False
+    SensorOutOfPhase : bool = False
+    HardwareESDReset : bool = False
+    RemoteLossOfSignal : bool = False
+    APIError : bool = False
+    SupplyOverV : bool = False
+    SupplyUnstable : bool = False
     ############################
 
     def __post_init__(self, BitField : int = 0):
