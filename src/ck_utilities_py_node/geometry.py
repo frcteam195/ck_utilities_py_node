@@ -53,16 +53,16 @@ class Translation:
 
     def to_msg(self) -> geometry_msgs.msg._Vector3.Vector3:
         output = geometry_msgs.msg._Vector3.Vector3()
-        output.x = self.x()
-        output.y = self.y()
-        output.z = self.z()
+        output.x = self.x
+        output.y = self.y
+        output.z = self.z
         return output
 
     def to_msg_point(self) -> geometry_msgs.msg._Point.Point:
         output = geometry_msgs.msg._Point.Point()
-        output.x = self.x()
-        output.y = self.y()
-        output.z = self.z()
+        output.x = self.x
+        output.y = self.y
+        output.z = self.z
         return output
 
 class Rotation:
@@ -107,15 +107,14 @@ class Rotation:
 
     def to_msg(self) -> geometry_msgs.msg._Vector3.Vector3:
         output = geometry_msgs.msg._Vector3.Vector3()
-        output.x = self.roll()
-        output.y = self.pitch()
-        output.z = self.yaw()
+        output.x = self.roll
+        output.y = self.pitch
+        output.z = self.yaw
         return output
 
     def to_msg_quat(self) -> geometry_msgs.msg._Quaternion.Quaternion:
         output = geometry_msgs.msg._Quaternion.Quaternion()
-        eulers = ([self.roll(), self.pitch(), self.yaw()])
-        quats = quaternion_from_euler(eulers)
+        quats = quaternion_from_euler(self.roll, self.pitch, self.yaw)
         output.x = quats[0]
         output.y = quats[1]
         output.z = quats[2]
@@ -126,7 +125,7 @@ class RotationQuaternion:
 
     def __init__(self, input_type = None):
         if input_type is None:
-            self.__rotation = numpy.zeros(4,4)
+            self.__rotation = numpy.zeros((4,4))
             return
         elif isinstance(input_type, geometry_msgs.msg._Quaternion.Quaternion):
             self.__init_from_quaternion(input_type)
@@ -267,7 +266,7 @@ class Twist:
         self.__angular = value
 
     def to_msg(self) -> geometry_msgs.msg._Twist.Twist:
-        output = geometry_msgs.msg._Twist.Twist
+        output = geometry_msgs.msg._Twist.Twist()
         output.linear = self.__linear.to_msg()
         output.angular = self.__angular.to_msg()
         return output
@@ -280,7 +279,7 @@ class Scale:
 
 class Covariance:
     def __init__(self):
-        self.__covariance = numpy.zeros(6, 6)
+        self.__covariance = numpy.zeros((6,6))
 
     @property
     def x_var(self) -> float:
@@ -327,5 +326,6 @@ class Covariance:
     def to_msg(self):
         output = []
         for i in self.__covariance:
-            output.append(i)
+            for j in i:
+                output.append(j)
         return output
