@@ -123,3 +123,10 @@ class Cylinder(ShapeBase):
 
     def publish(self):
         self.manager().publish_static_shape(self.convert_to_marker())
+
+class Arrow(ShapeBase):
+    def __init__(self, namespace : str, id : int, base_frame : str):
+        super().__init__(namespace, id, base_frame, 0)
+
+    def publish(self):
+        self.manager().publish_static_shape(self.convert_to_marker())
