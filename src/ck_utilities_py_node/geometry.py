@@ -51,6 +51,9 @@ class Translation:
     def z(self, value):
         self.__translation[2] = value
 
+    def rotate(self, rotation):
+        return rotation.to_quaternion() * self.__translation
+
     def to_msg(self) -> geometry_msgs.msg._Vector3.Vector3:
         output = geometry_msgs.msg._Vector3.Vector3()
         output.x = self.x
@@ -104,6 +107,10 @@ class Rotation:
     @yaw.setter
     def yaw(self, value : float):
         self.__rotation[2] = value
+
+    def to_quaternion(self):
+        quat = quaternion_from_euler(self.roll, self.pitch, self.yaw)
+        return quat
 
     def to_msg(self) -> geometry_msgs.msg._Vector3.Vector3:
         output = geometry_msgs.msg._Vector3.Vector3()
