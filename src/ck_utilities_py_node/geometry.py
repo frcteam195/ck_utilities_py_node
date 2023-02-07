@@ -200,7 +200,7 @@ class Pose:
     def orientation(self) -> Rotation:
         return self.__orientation
     @orientation.setter
-    def position(self, value : Rotation):
+    def orientation(self, value : Rotation):
         self.__orientation = value
 
     def to_msg(self) -> geometry_msgs.msg._Pose.Pose:
