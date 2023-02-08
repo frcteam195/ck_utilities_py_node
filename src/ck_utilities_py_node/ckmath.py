@@ -39,3 +39,19 @@ def polar_angle_rad(x, y):
 def limit(v, minVal, maxVal):
     return min(maxVal, max(minVal, v))
         
+def inches_to_meters(inches):
+    return inches * 0.0254
+
+def meters_to_inches(meters):
+    return meters / 0.0254
+
+
+        # inline double meters_to_inches(double meters)
+        # {
+        #     return meters / 0.0254;
+        # }
+
+        # inline double inches_to_meters(double inches)
+        # {
+        #     return inches * 0.0254;
+        # }
