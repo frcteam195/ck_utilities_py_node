@@ -84,8 +84,8 @@ class Rotation:
         quat = ([input_quaternion.x, input_quaternion.y, input_quaternion.z, input_quaternion.w])
         eulers = euler_from_quaternion(quat)
         self.roll = eulers[0]
-        self.yaw = eulers[1]
-        self.pitch = eulers[2]
+        self.pitch = eulers[1]
+        self.yaw = eulers[2]
 
     @property
     def roll(self) -> float:
