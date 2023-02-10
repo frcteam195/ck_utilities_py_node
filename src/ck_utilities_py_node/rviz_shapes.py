@@ -48,12 +48,14 @@ class ShapeManager:
         self.__class__.__static_shape_publisher.publish(transmit_array)
 
 class ShapeBase:
+    __cls_id : int = 0
 
-    def __init__(self, namespace : str, id : int, base_frame : str, type : int):
+    def __init__(self, base_frame : str, type : int):
         self.__transform = Transform()
         self.__base_frame = base_frame
-        self.__namespace = namespace
-        self.__id = id
+        self.__namespace = rospy.get_name()
+        ShapeBase.__cls_id += 1
+        self.__id = ShapeBase.__cls_id
         self.__type = type
         self.__scale = Scale(1.0, 1.0, 1.0)
         self.__color = Color(1.0, 1.0, 1.0, 1.0)
@@ -106,29 +108,29 @@ class ShapeBase:
         return marker
 
 class Cube(ShapeBase):
-    def __init__(self, namespace : str, id : int, base_frame : str):
-        super().__init__(namespace, id, base_frame, 1)
+    def __init__(self, base_frame : str):
+        super().__init__(base_frame, 1)
 
     def publish(self):
         self.manager().publish_static_shape(self.convert_to_marker())
 
 class Sphere(ShapeBase):
-    def __init__(self, namespace : str, id : int, base_frame : str):
-        super().__init__(namespace, id, base_frame, 2)
+    def __init__(self, base_frame : str):
+        super().__init__(base_frame, 2)
 
     def publish(self):
         self.manager().publish_static_shape(self.convert_to_marker())
 
 class Cylinder(ShapeBase):
-    def __init__(self, namespace : str, id : int, base_frame : str):
-        super().__init__(namespace, id, base_frame, 3)
+    def __init__(self, base_frame : str):
+        super().__init__(base_frame, 3)
 
     def publish(self):
         self.manager().publish_static_shape(self.convert_to_marker())
 
 class Arrow(ShapeBase):
-    def __init__(self, namespace : str, id : int, base_frame : str):
-        super().__init__(namespace, id, base_frame, 0)
+    def __init__(self, base_frame : str):
+        super().__init__(base_frame, 0)
 
     def publish(self):
         self.manager().publish_static_shape(self.convert_to_marker())
