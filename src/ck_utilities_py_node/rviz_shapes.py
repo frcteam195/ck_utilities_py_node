@@ -37,6 +37,8 @@ class ShapeManager:
         self.__class__.__static_shape_map = {}
 
     def publish_static_shape(self, marker : Marker):
+        if (str(marker.ns) + str(marker.id)) in self.__class__.__static_shape_map:
+            raise Exception("Cannot register the same ns + id combo twice: " + str(marker.ns) + ":" + str(marker.id))
         self.__class__.__static_shape_map[str(marker.ns) + str(marker.id)] = marker
 
         transmit_array = MarkerArray()
