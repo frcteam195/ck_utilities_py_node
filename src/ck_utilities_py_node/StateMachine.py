@@ -3,52 +3,42 @@ from abc import ABC, abstractmethod
 class StateMachine(ABC):
 
     class State(ABC):
-        def __init__(self):
+
+        @abstractmethod
+        def get_enum(self):
             pass
 
         @abstractmethod
-        def get_name(self):
-
-        @abstractmethod
-        def entry(self):
+        def entry(self, machine):
             pass
 
         @abstractmethod
-        def step(self):
+        def step(self, machine):
             pass
 
         @abstractmethod
-        def transition(self) -> str:
+        def transition(self, machine) -> str:
             pass
 
         def get_name(self):
             return self.__name
 
-    def __init__(self):
-        self.__state = ""
-        self.__states = {}
+    def __init__(self, states, state):
+        self.state = state
+        self.states = states
 
-        self.initialize_states()
-        pass
-
-    @abstractmethod
-    def initialize_states(self):
-        pass
-
-    @abstractmethod
-    def reset(self):
-        pass
+        self.states[self.state].entry(self)
 
     def get_current_state(self) -> str:
-        if self.__state is not "":
-            return self.__state
-        return "None"
+        return self.state
 
     def step(self):
-        initial_state = self.__state
-        self.__states[self.__state].step()
-        self.__states[self.__state].transition()
-        while self.__state is not initial_state:
-            initial_state = self.__state
-            self.__states[self.__state].step()
-            self.__states[self.__state].transition()
+        initial_state = self.state
+        self.states[self.state].step(self)
+        self.state = self.states[self.state].transition(self)
+        while self.state is not initial_state:
+            self.states[self.state].entry(self)
+            initial_state = self.state
+            self.states[self.state].step(self)
+            self.state = self.states[self.state].transition(self)
+
