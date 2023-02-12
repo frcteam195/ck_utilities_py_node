@@ -2,7 +2,7 @@
 
 import rospy
 from dataclasses import dataclass
-from threading import Thread, Lock
+from threading import Thread, RLock
 from ck_ros_base_msgs_node.msg import Motor_Status
 from ck_ros_base_msgs_node.msg import Motor_Info
 from ck_ros_base_msgs_node.msg import Motor_Control
@@ -184,7 +184,7 @@ class MotorManager:
         self.__motorStatuses = {}
         self.__controlPublisher = rospy.Publisher(name='/MotorControl', data_class=Motor_Control, queue_size=50, tcp_nodelay=True)
         self.__configPublisher = rospy.Publisher(name='/MotorConfiguration', data_class=Motor_Configuration, queue_size=50, tcp_nodelay=True)
-        self.__mutex = Lock()
+        self.__mutex = RLock()
         x = Thread(target=self.__motorMasterLoop)
         rospy.Subscriber("/MotorStatus", Motor_Status, self.__receive_motor_status)
         x.start()
@@ -290,9 +290,6 @@ class MotorManager:
             if motorId in self.__motorConfigs:
                 if self.__motorConfigs[motorId]:
                     controlStructure = self.__motorControls[motorId]
-                    if self.__motorConfigs[motorId].followingEnabled:
-                        controlStructure.controlMode = ControlMode.FOLLOWER
-                        controlStructure.output = self.__motorConfigs[motorId].followerId
                 controlMessage.motors.append(self.__create_motor_control_dictionary(motorId, controlStructure))
         self.__controlPublisher.publish(controlMessage)
 
@@ -312,7 +309,7 @@ class MotorManager:
 
 class Motor:
     manager = None
-    mutex = Lock()
+    mutex = RLock()
 
     def __init__(self, *args):
         self.config = MotorConfig()
@@ -340,6 +337,8 @@ class Motor:
     def apply(self):
         with self.__class__.mutex:
             __class__.manager.apply_motor_config(self.id, self.config)
+            if self.config.followingEnabled:
+                self.set(ControlMode.FOLLOWER, self.config.followerId, 0.)
 
     def set_fast_master(self, enable : bool):
         self.config.fast_master = enable
@@ -675,4 +674,3 @@ class Motor:
             self.config.reverseLimitSwitchNormal = LimitSwitchNormal.Disabled
         self.config.peakOutputForward = rospy.get_param(rospy.get_name() + "/" + motor_string + "_peakOutputForward")
         self.config.peakOutputReverse = rospy.get_param(rospy.get_name() + "/" + motor_string + "_peakOutputReverse")
-        self.set(ControlMode.FOLLOWER, self.config.followerId, 0.)
