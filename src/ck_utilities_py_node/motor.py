@@ -449,7 +449,7 @@ class Motor:
         self.config = MotorConfig()
         self.config.type = self.type
 
-    def set(self, controlMode : ControlMode, output : float, arbitraryFeedForward : float):
+    def set(self, controlMode : ControlMode, output : float, arbitraryFeedForward : float=0):
         outputControl = OutputControl()
         outputControl.controlMode = controlMode
         outputControl.output = output

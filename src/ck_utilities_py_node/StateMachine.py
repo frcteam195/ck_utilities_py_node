@@ -13,15 +13,15 @@ class StateMachine(ABC):
             pass
 
         @abstractmethod
-        def entry(self, machine):
+        def entry(self):
             pass
 
         @abstractmethod
-        def step(self, machine):
+        def step(self):
             pass
 
         @abstractmethod
-        def transition(self, machine) -> str:
+        def transition(self) -> str:
             pass
 
         def get_name(self):
@@ -31,7 +31,7 @@ class StateMachine(ABC):
         self.state = state
         self.states = states
 
-        self.states[self.state].entry(self)
+        self.states[self.state].entry()
         self.transition_history = Queue(10)
 
         self.log_count = 0
@@ -57,15 +57,15 @@ class StateMachine(ABC):
 
     def step(self):
         initial_state = self.state
-        self.states[self.state].step(self)
-        self.state = self.states[self.state].transition(self)
+        self.states[self.state].step()
+        self.state = self.states[self.state].transition()
         while self.state is not initial_state:
             if self.transition_history.full():
                 self.transition_history.get()
             self.transition_history.put(str(self.log_count) + ": TRANSITION: " + str(initial_state) + " -> " + str(self.state))
             self.log_count += 1
-            self.states[self.state].entry(self)
+            self.states[self.state].entry()
             initial_state = self.state
-            self.states[self.state].step(self)
-            self.state = self.states[self.state].transition(self)
+            self.states[self.state].step()
+            self.state = self.states[self.state].transition()
         self.log_data()
