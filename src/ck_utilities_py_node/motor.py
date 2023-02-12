@@ -48,7 +48,7 @@ class ControlMode(Enum):
     POSITION = 1
     VELOCITY = 2
     CURRENT = 3
-    __FOLLOWER = 5
+    FOLLOWER = 5
     MOTION_PROFILE = 6
     MOTION_MAGIC = 7
     MOTION_PROFILE_ARC = 10
@@ -182,8 +182,8 @@ class MotorManager:
         self.__motorConfigs = {}
         self.__motorControls = {}
         self.__motorStatuses = {}
-        self.__controlPublisher = rospy.Publisher(name='MotorControl', data_class=Motor_Control, queue_size=50, tcp_nodelay=True)
-        self.__configPublisher = rospy.Publisher(name='MotorConfiguration', data_class=Motor_Configuration, queue_size=50, tcp_nodelay=True)
+        self.__controlPublisher = rospy.Publisher(name='/MotorControl', data_class=Motor_Control, queue_size=50, tcp_nodelay=True)
+        self.__configPublisher = rospy.Publisher(name='/MotorConfiguration', data_class=Motor_Configuration, queue_size=50, tcp_nodelay=True)
         self.__mutex = Lock()
         x = Thread(target=self.__motorMasterLoop)
         rospy.Subscriber("/MotorStatus", Motor_Status, self.__receive_motor_status)
@@ -291,7 +291,7 @@ class MotorManager:
                 if self.__motorConfigs[motorId]:
                     controlStructure = self.__motorControls[motorId]
                     if self.__motorConfigs[motorId].followingEnabled:
-                        controlStructure.controlMode = ControlMode.__FOLLOWER
+                        controlStructure.controlMode = ControlMode.FOLLOWER
                         controlStructure.output = self.__motorConfigs[motorId].followerId
                 controlMessage.motors.append(self.__create_motor_control_dictionary(motorId, controlStructure))
         self.__controlPublisher.publish(controlMessage)
@@ -557,13 +557,13 @@ class Motor:
         if status is not None:
             return status.raw_output_percent
         return 0.0
-    
+
     def get_faults(self) -> Faults:
         status : Motor_Info = self.__get_status()
         if status is not None:
             return Faults(status.faults)
         return Faults()
-    
+
     def get_sticky_faults(self) -> StickyFaults:
         status : Motor_Info = self.__get_status()
         if status is not None:
@@ -675,3 +675,4 @@ class Motor:
             self.config.reverseLimitSwitchNormal = LimitSwitchNormal.Disabled
         self.config.peakOutputForward = rospy.get_param(rospy.get_name() + "/" + motor_string + "_peakOutputForward")
         self.config.peakOutputReverse = rospy.get_param(rospy.get_name() + "/" + motor_string + "_peakOutputReverse")
+        self.set(ControlMode.FOLLOWER, self.config.followerId, 0.)
