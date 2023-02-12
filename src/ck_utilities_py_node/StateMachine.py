@@ -68,4 +68,4 @@ class StateMachine(ABC):
             initial_state = self.state
             self.states[self.state].step()
             self.state = self.states[self.state].transition()
-        self.log_data()
+        # self.log_data()
