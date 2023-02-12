@@ -11,6 +11,7 @@ from ck_ros_base_msgs_node.msg import Motor_Config
 import ck_ros_base_msgs_node.msg
 from ck_ros_base_msgs_node.msg import Current_Limit_Configuration
 from enum import Enum
+from ck_utilities_py_node.ckmath import within
 
 class NeutralMode(Enum):
     Coast = 1
@@ -207,6 +208,12 @@ class MotorManager:
         with self.__mutex:
             if id in self.__motorStatuses:
                 return self.__motorStatuses[id]
+            return None
+    
+    def get_control(self, id):
+        with self.__mutex:
+            if id in self.__motorControls:
+                return self.__motorControls[id]
             return None
 
     @staticmethod
@@ -457,101 +464,105 @@ class Motor:
         with self.__class__.mutex:
             self.__class__.manager.update_motor_control(self.id, outputControl)
 
-    def __get_status(self):
+    def __get_status(self) -> Motor_Info:
         with self.__class__.mutex:
             return __class__.manager.get_status(self.id)
+        
+    def __get_control(self) -> OutputControl:
+        with self.__class__.mutex:
+            return __class__.manager.get_control(self.id)
 
-    def get_sensor_position(self):
+    def get_sensor_position(self) -> float:
         status = self.__get_status()
         if status is not None:
             return status.sensor_position
         return 0.0
 
-    def get_sensor_velocity(self):
+    def get_sensor_velocity(self) -> float:
         status = self.__get_status()
         if status is not None:
             return status.sensor_velocity
         return 0.0
 
-    def get_bus_voltage(self):
+    def get_bus_voltage(self) -> float:
         status = self.__get_status()
         if status is not None:
             return status.bus_voltage
         return 0.0
 
-    def get_bus_current(self):
+    def get_bus_current(self) -> float:
         status = self.__get_status()
         if status is not None:
             return status.bus_current
         return 0.0
 
-    def get_stator_current(self):
+    def get_stator_current(self) -> float:
         status = self.__get_status()
         if status is not None:
             return status.stator_current
         return 0.0
 
-    def get_forward_limit_closed(self):
+    def get_forward_limit_closed(self) -> bool:
         status = self.__get_status()
         if status is not None:
             return status.forward_limit_closed
         return False
 
-    def get_reverse_limit_closed(self):
+    def get_reverse_limit_closed(self) -> bool:
         status = self.__get_status()
         if status is not None:
             return status.reverse_limit_closed
         return False
 
-    def get_control_mode(self):
+    def get_control_mode(self) -> int:
         status = self.__get_status()
         if status is not None:
             return status.control_mode
         return 0
 
-    def get_commanded_output(self):
+    def get_commanded_output(self) -> float:
         status = self.__get_status()
         if status is not None:
             return status.commanded_output
         return 0.0
 
-    def get_active_trajectory_arbff(self):
+    def get_active_trajectory_arbff(self) -> float:
         status = self.__get_status()
         if status is not None:
             return status.active_trajectory_arbff
         return 0.0
 
-    def get_active_trajectory_position(self):
+    def get_active_trajectory_position(self) -> float:
         status = self.__get_status()
         if status is not None:
             return status.active_trajectory_position
         return 0.0
 
-    def get_active_trajectory_velocity(self):
+    def get_active_trajectory_velocity(self) -> float:
         status = self.__get_status()
         if status is not None:
             return status.active_trajectory_velocity
         return 0.0
 
-    def get_raw_closed_loop_error(self):
+    def get_raw_closed_loop_error(self) -> float:
         status = self.__get_status()
         if status is not None:
             return status.raw_closed_loop_error
         return 0.0
 
-    def get_raw_integral_accum(self):
+    def get_raw_integral_accum(self) -> float:
         status = self.__get_status()
         if status is not None:
             return status.raw_integral_accum
         return 0.0
 
-    def get_raw_error_derivative(self):
+    def get_raw_error_derivative(self) -> float:
         status = self.__get_status()
         if status is not None:
             return status.raw_error_derivative
         return 0.0
 
-    def get_raw_output_percent(self):
+    def get_raw_output_percent(self) -> float:
         status = self.__get_status()
         if status is not None:
             return status.raw_output_percent
@@ -568,6 +579,28 @@ class Motor:
         if status is not None:
             return StickyFaults(status.sticky_faults)
         return StickyFaults()
+    
+    def get_setpoint(self) -> float:
+        return self.__get_control().output
+
+    def is_at_setpoint(self, setpoint_delta_threshold : float) -> bool:
+        control : OutputControl = self.__get_control()
+        status : Motor_Info = self.__get_status()
+        if control == None or status == None:
+            return False
+
+        ctrl_mode = control.controlMode
+        setpoint = control.output
+
+        if ctrl_mode == ControlMode.MOTION_MAGIC or ctrl_mode == ControlMode.POSITION:
+            return within(setpoint, status.sensor_position, setpoint_delta_threshold)
+        elif ctrl_mode == ControlMode.VELOCITY:
+            return within(setpoint, status.sensor_velocity, setpoint_delta_threshold)
+        elif ctrl_mode == ControlMode.CURRENT:
+            return within(setpoint, status.bus_current, setpoint_delta_threshold)
+        else:
+            return True
+        
 
     def __ros_motor_config_validation(self, motor_string):
         config_strings = {
