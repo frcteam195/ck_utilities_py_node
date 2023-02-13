@@ -3,7 +3,7 @@
 from typing import List
 import rospy
 from dataclasses import dataclass
-from threading import Thread, Lock
+from threading import Thread, RLock
 from ck_ros_base_msgs_node.msg import Solenoid_Control
 from ck_ros_base_msgs_node.msg import Solenoid as SolenoidROS
 from enum import Enum
@@ -53,7 +53,7 @@ class SolenoidManager:
     def __init__(self):
         self.__solenoidControls : dict[int, SolenoidControl] = {}
         self.__controlPublisher = rospy.Publisher(name='SolenoidControl', data_class=Solenoid_Control, queue_size=50, tcp_nodelay=True)
-        self.__mutex = Lock()
+        self.__mutex = RLock()
         x = Thread(target=self.__solenoidMasterLoop)
         x.start()
 
@@ -93,7 +93,7 @@ class SolenoidManager:
 
 class Solenoid:
     manager : SolenoidManager = None
-    mutex = Lock()
+    mutex = RLock()
 
     def __init__(self, *args):
         self.__solenoidControl : SolenoidControl = SolenoidControl()
