@@ -105,7 +105,11 @@ class Solenoid:
         elif isinstance(args[0], str) and isinstance(args[1], SolenoidType):
             if not rospy.has_param(rospy.get_name() + "/" + args[0] + "_solenoid_id"):
                 raise Exception ("Solenoid: " + args[0] + "_id is not set!")
+            if not rospy.has_param(rospy.get_name() + "/" + args[0] + "_module_id"):
+                raise Exception ("Solenoid: " + args[0] + "_id is not set!")
             self.__solenoidControl.id = rospy.get_param(rospy.get_name() + "/" + args[0] + "_solenoid_id")
+            module_id = rospy.get_param(rospy.get_name() + "/" + args[0] + "_module_id")
+            self.__solenoidControl.id = self.__solenoidControl.id | ((module_id << 16) & 0xFFFF0000)
             self.__solenoidControl.type = args[1]
             self.__load_solenoid_config(args[0])
         else:
