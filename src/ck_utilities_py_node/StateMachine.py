@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from queue import Queue
+from enum import Enum
 from ck_ros_base_msgs_node.msg import StateMachineLog
 import rospy
 
@@ -21,7 +22,7 @@ class StateMachine(ABC):
             pass
 
         @abstractmethod
-        def transition(self) -> str:
+        def transition(self) -> Enum:
             pass
 
         def get_name(self):
