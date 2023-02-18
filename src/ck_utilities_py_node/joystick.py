@@ -28,7 +28,7 @@ class Joystick:
     def __init__(self, id : int):
         self.__id = id
         self.__prevButtonVals = {}
-        self.__prevPOVVals = []
+        self.__prevPOVVals = {}
         if id > MAX_NUM_JOYSTICKS():
             raise JoystickIDOutOfRangeException("Joystick ID " + str(id) + " out of range!")
 
@@ -87,7 +87,6 @@ class Joystick:
         if self.__id in self.joystick_map:
             if povID < MAX_NUM_POVS() and len(self.joystick_map[self.__id].povs) > povID:
                 retVal = self.joystick_map[self.__id].povs[povID]
-            self.__prevPOVVals[povID] = retVal
         return retVal
             
     def getRisingEdgePOV(self, povID : int) -> Tuple[bool, int]:
@@ -96,6 +95,6 @@ class Joystick:
         if self.__id in self.joystick_map:
             if povID < MAX_NUM_POVS() and len(self.joystick_map[self.__id].povs) > povID:
                 retVal_povint = self.joystick_map[self.__id].povs[povID]
-            retVal_bool = (retVal_povint != -1) and (retVal_povint != self.__prevPOVVals[povID])
-            self.__prevPOVVals[povID] = retVal_povint
+                retVal_bool = (retVal_povint >= -1) and (retVal_povint != self.__prevPOVVals[povID])
+                self.__prevPOVVals[povID] = retVal_povint
         return retVal_bool, retVal_povint
