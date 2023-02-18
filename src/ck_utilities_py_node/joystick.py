@@ -65,7 +65,7 @@ class Joystick:
             if self.__id in self.joystick_map:
                 if len(self.joystick_map[self.__id].buttons) > buttonID:
                     currVal = self.joystick_map[self.__id].buttons[buttonID]
-            retVal = currVal and (currVal != self.__getPrevButton(buttonID))
+            retVal = currVal and (currVal != self.__prevButtonVals.get(id, False))
             self.__prevButtonVals[buttonID] = currVal
             return retVal
         return False
@@ -83,16 +83,6 @@ class Joystick:
         if self.__id in self.joystick_map:
             if povID < MAX_NUM_POVS() and len(self.joystick_map[self.__id].povs) > povID:
                 retVal_povint = self.joystick_map[self.__id].povs[povID]
-                retVal_bool = (retVal_povint >= -1) and (retVal_povint != self.__getPrevPOV(povID))
+                retVal_bool = (retVal_povint >= -1) and (retVal_povint != self.__prevPOVVals.get(povID, -1))
                 self.__prevPOVVals[povID] = retVal_povint
         return retVal_bool, retVal_povint
-
-    def __getPrevButton(self, id : int) -> bool:
-        if id in self.__prevButtonVals.keys():
-            return self.__prevButtonVals[id]
-        return False
-    
-    def __getPrevPOV(self, id : int) -> int:
-        if id in self.__prevPOVVals.keys():
-            return self.__prevPOVVals[id]
-        return -1
