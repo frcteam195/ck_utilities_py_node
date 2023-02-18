@@ -96,6 +96,8 @@ class Joystick:
         if self.__id in self.joystick_map:
             if povID < MAX_NUM_POVS() and len(self.joystick_map[self.__id].povs) > povID:
                 retVal_povint = self.joystick_map[self.__id].povs[povID]
+                if povID not in self.__prevPOVVals:
+                    self.__prevPOVVals[povID] = retVal_povint
                 retVal_bool = (retVal_povint >= -1) and (retVal_povint != self.__prevPOVVals[povID])
                 self.__prevPOVVals[povID] = retVal_povint
         return retVal_bool, retVal_povint
