@@ -87,7 +87,7 @@ class Joystick:
         if self.__id in self.joystick_map:
             if povID < MAX_NUM_POVS() and len(self.joystick_map[self.__id].povs) > povID:
                 retVal = self.joystick_map[self.__id].povs[povID]
-            self.__prevPOVVals[povID] = retVal
+            #self.__prevPOVVals[povID] = retVal
         return retVal
             
     def getRisingEdgePOV(self, povID : int) -> Tuple[bool, int]:
