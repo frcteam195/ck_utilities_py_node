@@ -56,7 +56,6 @@ class Joystick:
             if self.__id in self.joystick_map:
                 if len(self.joystick_map[self.__id].buttons) > buttonID:
                     retVal = self.joystick_map[self.__id].buttons[buttonID]
-            self.__prevButtonVals[buttonID] = retVal
             return retVal
         return False
 
@@ -66,18 +65,7 @@ class Joystick:
             if self.__id in self.joystick_map:
                 if len(self.joystick_map[self.__id].buttons) > buttonID:
                     currVal = self.joystick_map[self.__id].buttons[buttonID]
-            retVal = currVal and (currVal != self.__prevButtonVals[buttonID])
-            self.__prevButtonVals[buttonID] = currVal
-            return retVal
-        return False
-
-    def getFallingEdgeButton(self, buttonID : int) -> bool:
-        if buttonID < MAX_NUM_BUTTONS():
-            currVal = False
-            if self.__id in self.joystick_map:
-                if len(self.joystick_map[self.__id].buttons) > buttonID:
-                    currVal = self.joystick_map[self.__id].buttons[buttonID]
-            retVal = (not currVal) and (currVal != self.__prevButtonVals[buttonID])
+            retVal = currVal and (currVal != self.__getPrevButton(buttonID))
             self.__prevButtonVals[buttonID] = currVal
             return retVal
         return False
@@ -87,7 +75,6 @@ class Joystick:
         if self.__id in self.joystick_map:
             if povID < MAX_NUM_POVS() and len(self.joystick_map[self.__id].povs) > povID:
                 retVal = self.joystick_map[self.__id].povs[povID]
-            #self.__prevPOVVals[povID] = retVal
         return retVal
             
     def getRisingEdgePOV(self, povID : int) -> Tuple[bool, int]:
@@ -96,6 +83,16 @@ class Joystick:
         if self.__id in self.joystick_map:
             if povID < MAX_NUM_POVS() and len(self.joystick_map[self.__id].povs) > povID:
                 retVal_povint = self.joystick_map[self.__id].povs[povID]
-                retVal_bool = (retVal_povint >= -1) and (retVal_povint != self.__prevPOVVals[povID])
+                retVal_bool = (retVal_povint >= -1) and (retVal_povint != self.__getPrevPOV(povID))
                 self.__prevPOVVals[povID] = retVal_povint
         return retVal_bool, retVal_povint
+
+    def __getPrevButton(self, id : int) -> bool:
+        if id in self.__prevButtonVals.keys():
+            return self.__prevButtonVals[id]
+        return False
+    
+    def __getPrevPOV(self, id : int) -> int:
+        if id in self.__prevPOVVals.keys():
+            return self.__prevPOVVals[id]
+        return -1
