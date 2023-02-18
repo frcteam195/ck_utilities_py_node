@@ -4,6 +4,7 @@ from threading import Thread, Lock
 from enum import Enum
 from ck_ros_base_msgs_node.msg import Joystick_Status
 from ck_utilities_py_node.ckmath import *
+from typing import Tuple
 
 def MAX_NUM_JOYSTICKS() -> int :
     return 6
@@ -27,6 +28,7 @@ class Joystick:
     def __init__(self, id : int):
         self.__id = id
         self.__prevButtonVals = {}
+        self.__prevPOVVals = []
         if id > MAX_NUM_JOYSTICKS():
             raise JoystickIDOutOfRangeException("Joystick ID " + str(id) + " out of range!")
 
@@ -81,7 +83,19 @@ class Joystick:
         return False
 
     def getPOV(self, povID : int) -> int:
+        retVal = -1
         if self.__id in self.joystick_map:
             if povID < MAX_NUM_POVS() and len(self.joystick_map[self.__id].povs) > povID:
-                return self.joystick_map[self.__id].povs[povID]
-        return -1
+                retVal = self.joystick_map[self.__id].povs[povID]
+            self.__prevPOVVals[povID] = retVal
+        return retVal
+            
+    def getRisingEdgePOV(self, povID : int) -> Tuple[bool, int]:
+        retVal_bool = False
+        retVal_povint = -1
+        if self.__id in self.joystick_map:
+            if povID < MAX_NUM_POVS() and len(self.joystick_map[self.__id].povs) > povID:
+                retVal_povint = self.joystick_map[self.__id].povs[povID]
+            retVal_bool = (retVal_povint != -1) and (retVal_povint != self.__prevPOVVals[povID])
+            self.__prevPOVVals[povID] = retVal_povint
+        return retVal_bool, retVal_povint
