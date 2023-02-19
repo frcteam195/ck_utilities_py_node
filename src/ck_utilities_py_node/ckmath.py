@@ -6,10 +6,12 @@ def handleDeadband(val, deadband):
     return val if abs(val) > abs(deadband) else 0
 
 
-def normalizeWithDeadband(val, deadband):
+def normalizeWithDeadband(val, deadband, min_value = 0):
     val = handleDeadband(val, deadband)
     if val != 0:
-        val = np.sign(val) * ((abs(val) - deadband) / (1.0 - deadband))
+        sign = np.sign(val)
+        val = ((abs(val) - deadband) / (1.0 - deadband))
+        val = sign * (min_value + (val - 0) * ((1.0 - min_value) / (1.0 - 0.0)))
     return val
 
 
