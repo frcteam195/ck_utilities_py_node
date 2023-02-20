@@ -15,6 +15,10 @@ def normalizeWithDeadband(val, deadband, min_value = 0):
     return val
 
 
+def lirp(val, min_x, max_x, min_y, max_y):
+    return (min_y + (val - min_x) * ((max_y - min_y) / (max_x - min_x)))
+
+
 def within(value1, value2, threshold) -> bool:
     return True if abs(value1 - value2) < abs(threshold) else False
 
