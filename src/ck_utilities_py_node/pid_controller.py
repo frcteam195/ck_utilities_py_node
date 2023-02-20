@@ -16,10 +16,10 @@ class PIDController:
         self.__last_time = 0
 
     def set_gains(self,  kP : float, kI : float, kD : float, kF : float):
-        self.__kP = kP
-        self.__kI = kI
-        self.__kD = kD
-        self.__kF = kF
+        self.kP = kP
+        self.kI = kI
+        self.kD = kD
+        self.kF = kF
     
     def set_filter(self, filter_r : float):
         self.__filter_r = filter_r
@@ -38,7 +38,7 @@ class PIDController:
         dt = time - self.__last_time
         self.__last_time = time
 
-        return self.__error * self.__kP + self.__error_sum * self.__kI + self.__error_d * self.__kD + self.__kF * self.__setpoint
+        return self.__error * self.kP + self.__error_sum * self.kI + self.__error_d * self.kD + self.kF * self.__setpoint
 
     def update_by_error(self, error : float) -> float:
         self.__error = error
@@ -50,4 +50,4 @@ class PIDController:
         dt = time - self.__last_time
         self.__last_time = time
 
-        return self.__error * self.__kP + self.__error_sum * self.__kI + self.__error_d * self.__kD;
+        return self.__error * self.kP + self.__error_sum * self.kI + self.__error_d * self.kD;
