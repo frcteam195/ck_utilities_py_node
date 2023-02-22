@@ -14,6 +14,7 @@ class PIDController:
         self.__actual = 0
         self.__setpoint = 0
         self.__last_time = 0
+        self.__prev_setpoint = 0
 
     def set_gains(self,  kP : float, kI : float, kD : float, kF : float):
         self.kP = kP
@@ -30,6 +31,9 @@ class PIDController:
 
         self.__error = self.__setpoint - self.__actual
 
+        if self.__prev_setpoint != self.__setpoint:
+            self.__error_sum = 0
+
         self.__error_sum += self.__error
         self.__error_d = self.__error_d + (1 - self.__filter_r) * (self.__error - self.__error_last)
         self.__error_last = self.__error
@@ -37,6 +41,7 @@ class PIDController:
         time = rospy.get_time()
         dt = time - self.__last_time
         self.__last_time = time
+        self.__prev_setpoint = self.__setpoint
 
         return self.__error * self.kP + self.__error_sum * self.kI + self.__error_d * self.kD + self.kF * self.__setpoint
 
