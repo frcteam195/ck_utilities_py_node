@@ -20,7 +20,7 @@ class PIDController:
         self.kI = kI
         self.kD = kD
         self.kF = kF
-    
+
     def set_filter(self, filter_r : float):
         self.__filter_r = filter_r
 
@@ -30,7 +30,7 @@ class PIDController:
 
         self.__error = self.__setpoint - self.__actual
 
-        self.__error_sum = self.__error_sum + self.__error
+        self.__error_sum += self.__error
         self.__error_d = self.__error_d + (1 - self.__filter_r) * (self.__error - self.__error_last)
         self.__error_last = self.__error
 
@@ -42,7 +42,9 @@ class PIDController:
 
     def update_by_error(self, error : float) -> float:
         self.__error = error
-        self.__error_sum += self.__error_sum + self.__error
+        self.__error_sum += self.__error
+        if self.kI == 0:
+            self.__error_sum = 0
         self.__error_d = (1 - self.__filter_r) * (self.__error - self.__error_last)
         self.__error_last = self.__error
 
@@ -50,4 +52,4 @@ class PIDController:
         dt = time - self.__last_time
         self.__last_time = time
 
-        return self.__error * self.kP + self.__error_sum * self.kI + self.__error_d * self.kD;
+        return self.__error * self.kP + self.__error_sum * self.kI + self.__error_d * self.kD
