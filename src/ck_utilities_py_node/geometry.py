@@ -3,6 +3,7 @@ from geometry_msgs.msg import *
 from nav_msgs.msg import *
 from std_msgs.msg import *
 from tf.transformations import *
+from dataclasses import dataclass
 
 
 class Translation:
@@ -337,3 +338,10 @@ class Covariance:
             for j in i:
                 output.append(j)
         return output
+
+@dataclass
+class Rectangle:
+    upper_left_x : float = 0
+    upper_left_y : float = 0
+    lower_right_x : float = 0
+    lower_right_y : float = 0
