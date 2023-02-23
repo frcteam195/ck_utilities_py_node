@@ -60,13 +60,24 @@ class StateMachine(ABC):
         initial_state = self.state
         self.states[self.state].step()
         self.state = self.states[self.state].transition()
-        while self.state is not initial_state:
+
+        ## This is the no super step implementation
+        if self.state is not initial_state:
             if self.transition_history.full():
                 self.transition_history.get()
             self.transition_history.put(str(self.log_count) + ": TRANSITION: " + str(initial_state) + " -> " + str(self.state))
             self.log_count += 1
-            self.states[self.state].entry()
-            initial_state = self.state
-            self.states[self.state].step()
-            self.state = self.states[self.state].transition()
-        # self.log_data()
+
+        ## This is the super step implementation
+        # while self.state is not initial_state:
+        #     if self.transition_history.full():
+        #         self.transition_history.get()
+        #     self.transition_history.put(str(self.log_count) + ": TRANSITION: " + str(initial_state) + " -> " + str(self.state))
+        #     self.log_count += 1
+        #     self.states[self.state].entry()
+        #     initial_state = self.state
+        #     self.states[self.state].step()
+        #     self.state = self.states[self.state].transition()
+
+        # And this is regular
+        self.log_data()
