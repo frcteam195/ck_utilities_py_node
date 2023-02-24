@@ -25,6 +25,9 @@ class StateMachine(ABC):
         def transition(self) -> Enum:
             pass
 
+        def end(self):
+            pass
+
         def get_name(self):
             return self.__name
 
@@ -63,6 +66,8 @@ class StateMachine(ABC):
 
         ## This is the no super step implementation
         if self.state is not initial_state:
+            self.states[initial_state].end()
+            self.states[self.state].entry()
             if self.transition_history.full():
                 self.transition_history.get()
             self.transition_history.put(str(self.log_count) + ": TRANSITION: " + str(initial_state) + " -> " + str(self.state))
@@ -74,6 +79,7 @@ class StateMachine(ABC):
         #         self.transition_history.get()
         #     self.transition_history.put(str(self.log_count) + ": TRANSITION: " + str(initial_state) + " -> " + str(self.state))
         #     self.log_count += 1
+        #     self.states[initial_state].end()
         #     self.states[self.state].entry()
         #     initial_state = self.state
         #     self.states[self.state].step()
