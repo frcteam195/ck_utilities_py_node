@@ -142,6 +142,11 @@ class MotorConfig:
     kI : float = 0
     kD : float = 0
     kF : float = 0
+    kP_1 : float = 0
+    kI_1 : float = 0
+    kD_1 : float = 0
+    kF_1 : float = 0
+    active_gain_slot : int = 0
     iZone : float = 0
     maxIAccum : float = 0
     allowedClosedLoopError : float = 0
@@ -248,6 +253,11 @@ class MotorManager:
         motorConfigMsg.kI = motorConfig.kI
         motorConfigMsg.kD = motorConfig.kD
         motorConfigMsg.kF = motorConfig.kF
+        motorConfigMsg.kP_1 = motorConfig.kP_1
+        motorConfigMsg.kI_1 = motorConfig.kI_1
+        motorConfigMsg.kD_1 = motorConfig.kD_1
+        motorConfigMsg.kF_1 = motorConfig.kF_1
+        motorConfigMsg.active_gain_slot = motorConfig.active_gain_slot
         motorConfigMsg.iZone = motorConfig.iZone
         motorConfigMsg.max_i_accum = motorConfig.maxIAccum
         motorConfigMsg.allowed_closed_loop_error = motorConfig.allowedClosedLoopError
@@ -365,6 +375,21 @@ class Motor:
 
     def set_kF(self, value : float):
         self.config.kF = value
+
+    def set_kP_Slot1(self, value : float):
+        self.config.kP_1 = value
+
+    def set_kI_Slot1(self, value : float):
+        self.config.kI_1 = value
+
+    def set_kD_Slot1(self, value : float):
+        self.config.kD_1 = value
+
+    def set_kF_Slot1(self, value : float):
+        self.config.kF_1 = value
+
+    def set_active_gain_slot(self, slotIdx : int):
+        self.config.active_gain_slot = slotIdx
 
     def set_i_zone(self, value : float):
         self.config.iZone = value
@@ -614,6 +639,11 @@ class Motor:
             "_kI",
             "_kD",
             "_kF",
+            "_kP_1",
+            "_kI_1",
+            "_kD_1",
+            "_kF_1",
+            "_activeGainSlot",
             "_iZone",
             "_maxIAccum",
             "_allowedClosedLoopError",
@@ -666,6 +696,11 @@ class Motor:
         self.config.kI = rospy.get_param(rospy.get_name() + "/" + motor_string + "_kI")
         self.config.kD = rospy.get_param(rospy.get_name() + "/" + motor_string + "_kD")
         self.config.kF = rospy.get_param(rospy.get_name() + "/" + motor_string + "_kF")
+        self.config.kP_1 = rospy.get_param(rospy.get_name() + "/" + motor_string + "_kP_1")
+        self.config.kI_1 = rospy.get_param(rospy.get_name() + "/" + motor_string + "_kI_1")
+        self.config.kD_1 = rospy.get_param(rospy.get_name() + "/" + motor_string + "_kD_1")
+        self.config.kF_1 = rospy.get_param(rospy.get_name() + "/" + motor_string + "_kF_1")
+        self.config.active_gain_slot = rospy.get_param(rospy.get_name() + "/" + motor_string + "_activeGainSlot")
         self.config.iZone = rospy.get_param(rospy.get_name() + "/" + motor_string + "_iZone")
         self.config.maxIAccum = rospy.get_param(rospy.get_name() + "/" + motor_string + "_maxIAccum")
         self.config.allowedClosedLoopError = rospy.get_param(rospy.get_name() + "/" + motor_string + "_allowedClosedLoopError")
