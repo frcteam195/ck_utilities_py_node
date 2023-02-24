@@ -201,15 +201,19 @@ class MotorManager:
 
     def update_motor_control(self, motorId : int, outputControl : OutputControl):
         with self.__mutex:
+            old_output_control = None
+            if motorId in self.__motorControls:
+                old_output_control = self.__motorControls[motorId]
             self.__motorControls[motorId] = outputControl
-            self.__set_motor_now(motorId, outputControl)
+            if old_output_control != self.__motorControls[motorId]:
+                self.__set_motor_now(motorId, outputControl)
 
     def get_status(self, id):
         with self.__mutex:
             if id in self.__motorStatuses:
                 return self.__motorStatuses[id]
             return None
-    
+
     def get_control(self, id):
         with self.__mutex:
             if id in self.__motorControls:
@@ -467,7 +471,7 @@ class Motor:
     def __get_status(self) -> Motor_Info:
         with self.__class__.mutex:
             return __class__.manager.get_status(self.id)
-        
+
     def __get_control(self) -> OutputControl:
         with self.__class__.mutex:
             return __class__.manager.get_control(self.id)
@@ -579,7 +583,7 @@ class Motor:
         if status is not None:
             return StickyFaults(status.sticky_faults)
         return StickyFaults()
-    
+
     def get_setpoint(self) -> float:
         return self.__get_control().output
 
@@ -600,7 +604,7 @@ class Motor:
             return within(setpoint, status.bus_current, setpoint_delta_threshold)
         else:
             return True
-        
+
 
     def __ros_motor_config_validation(self, motor_string):
         config_strings = {
