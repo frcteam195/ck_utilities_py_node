@@ -51,13 +51,5 @@ def inches_to_meters(inches):
 def meters_to_inches(meters):
     return meters / 0.0254
 
-
-        # inline double meters_to_inches(double meters)
-        # {
-        #     return meters / 0.0254;
-        # }
-
-        # inline double inches_to_meters(double inches)
-        # {
-        #     return inches * 0.0254;
-        # }
+def epsilonEquals(a : float, b: float, epsilon : float = 0.000001) -> bool:
+    return (a - epsilon <= b) and (a + epsilon >= b)

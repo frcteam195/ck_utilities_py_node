@@ -18,6 +18,11 @@ class Translation:
         elif isinstance(input_type, geometry_msgs.msg._Point.Point):
             self.__init_from_point(input_type)
             return
+        elif isinstance(input_type, Translation):
+            self.__translation = numpy.zeros(3)
+            self.x = input_type.x
+            self.y = input_type.y
+            self.z = input_type.z
         raise ValueError("Type " + str(type(input_type)) + "is not supported by Translation constructor")
 
     def __init_from_translation(self, input_translation : geometry_msgs.msg._Vector3.Vector3):
@@ -79,6 +84,11 @@ class Rotation:
         elif isinstance(input_type, geometry_msgs.msg._Quaternion.Quaternion):
             self.__init_from_quaternion(input_type)
             return
+        elif isinstance(input_type, Rotation):
+            self.__rotation = numpy.zeros(3)
+            self.roll = input_type.roll
+            self.pitch = input_type.pitch
+            self.yaw = input_type.yaw
         raise ValueError("Type " + str(type(input_type)) + "is not supported by Rotation constructor")
 
     def __init_from_quaternion(self, input_quaternion : geometry_msgs.msg._Quaternion.Quaternion):
@@ -185,6 +195,9 @@ class Pose:
         elif isinstance(input_type, geometry_msgs.msg._Pose.Pose):
             self.__init_from_pose(input_type)
             return
+        elif isinstance(input_type, Pose):
+            self.__position : Translation = Translation(input_type.position)
+            self.__orientation : Rotation = Rotation(input_type.orientation)
         raise ValueError("Type " + str(type(input_type)) + "is not supported by RotationQuaternion constructor")
 
     def __init_from_pose(self, input_pose : geometry_msgs.msg._Pose.Pose):
