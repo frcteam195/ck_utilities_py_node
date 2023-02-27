@@ -59,7 +59,19 @@ class Translation:
         self.__translation[2] = value
 
     def rotate(self, rotation):
-        return rotation.to_quaternion() * self.__translation
+        quat = rotation.to_quaternion()
+        vec = numpy.zeros(4)
+        vec[0] = self.__translation[0]
+        vec[1] = self.__translation[1]
+        vec[2] = self.__translation[2]
+        vec[3] = 0
+        vec = quat * vec * quat.conjugate()
+        translation = Translation()
+        translation.x = vec[0,0]
+        translation.y = vec[1,1]
+        translation.z = vec[2,2]
+
+        return translation
 
     def to_msg(self) -> geometry_msgs.msg._Vector3.Vector3:
         output = geometry_msgs.msg._Vector3.Vector3()
@@ -122,7 +134,7 @@ class Rotation:
 
     def to_quaternion(self):
         quat = quaternion_from_euler(self.roll, self.pitch, self.yaw)
-        return quat
+        return quaternion_matrix(quat)
 
     def to_msg(self) -> geometry_msgs.msg._Vector3.Vector3:
         output = geometry_msgs.msg._Vector3.Vector3()
