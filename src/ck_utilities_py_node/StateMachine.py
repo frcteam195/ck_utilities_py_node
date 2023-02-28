@@ -50,13 +50,15 @@ class StateMachine(ABC):
         return self.state
 
     def log_data(self):
-        log_string = ""
-        for i in self.transition_history.queue:
-            log_string += i + "\n"
+        # log_string = ""
+        # for i in self.transition_history.queue:
+        #     log_string += i + "\n"
         log_msg = StateMachineLog()
         log_msg.current_state = str(self.state)
         log_msg.current_state_int = self.state.value
-        log_msg.transition_history = log_string
+        # log_msg.transition_history = log_string
+        # improve efficiency of logging
+        log_msg.transition_history = '\n'.join(self.transition_history.queue)
         self.log_publisher.publish(log_msg)
 
     def step(self):
@@ -70,7 +72,7 @@ class StateMachine(ABC):
             self.states[self.state].entry()
             if self.transition_history.full():
                 self.transition_history.get()
-            self.transition_history.put(str(self.log_count) + ": TRANSITION: " + str(initial_state) + " -> " + str(self.state))
+            self.transition_history.put(f"{str(self.log_count)}: TRANSITION: {str(initial_state)} -> {str(self.state)}")
             self.log_count += 1
 
         ## This is the super step implementation
