@@ -107,8 +107,9 @@ class Rotation:
         self.__rotation = numpy.zeros(3)
         quat = ([input_quaternion.x, input_quaternion.y, input_quaternion.z, input_quaternion.w])
         eulers = euler_from_quaternion(quat)
-        self.roll = eulers[0]
-        self.pitch = eulers[1]
+        #for some reason, roll and pitch are backwards?
+        self.roll = eulers[1]
+        self.pitch = eulers[0]
         self.yaw = eulers[2]
 
     @property
