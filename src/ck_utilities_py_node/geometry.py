@@ -66,10 +66,12 @@ class Translation:
         vec[2] = self.__translation[2]
         vec[3] = 0
         vec = quat * vec * quat.conjugate()
+        vec = vec / numpy.linalg.norm(vec)
+        vec = vec * numpy.linalg.norm(self.__translation)
         translation = Translation()
         translation.x = vec[0,0]
-        translation.y = vec[1,1]
-        translation.z = vec[2,2]
+        translation.y = vec[1,0]
+        translation.z = vec[2,0]
 
         return translation
 
