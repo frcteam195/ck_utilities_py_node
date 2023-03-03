@@ -93,6 +93,9 @@ class Rotation:
         if input_type is None:
             self.__rotation = numpy.zeros(3)
             return
+        elif isinstance(input_type, geometry_msgs.msg._Vector3.Vector3):
+            self.__init_from_angular(input_type)
+            return
         elif isinstance(input_type, geometry_msgs.msg._Quaternion.Quaternion):
             self.__init_from_quaternion(input_type)
             return
@@ -102,6 +105,12 @@ class Rotation:
             self.pitch = input_type.pitch
             self.yaw = input_type.yaw
         raise ValueError("Type " + str(type(input_type)) + "is not supported by Rotation constructor")
+
+    def __init_from_angular(self, input_angular : geometry_msgs.msg._Vector3.Vector3):
+        self.__rotation = numpy.zeros(3)
+        self.roll = input_angular.x
+        self.pitch = input_angular.y
+        self.yaw = input_angular.z
 
     def __init_from_quaternion(self, input_quaternion : geometry_msgs.msg._Quaternion.Quaternion):
         self.__rotation = numpy.zeros(3)
@@ -277,6 +286,9 @@ class Twist:
             self.__linear : Translation = Translation()
             self.__angular : Rotation = Rotation()
             return
+        elif isinstance(input_type, geometry_msgs.msg._Twist.Twist):
+            self.__init_from_twist(input_type)
+            return
         elif isinstance(input_type, geometry_msgs.msg._Transform.Transform):
             self.__init_from_pose(input_type)
             return
@@ -285,6 +297,10 @@ class Twist:
     def __init_from_pose(self, input_transform : geometry_msgs.msg._Transform.Transform):
         self.__linear = Translation(input_transform.translation)
         self.__angular = Rotation(input_transform.rotation)
+
+    def __init_from_twist(self, input_transform : geometry_msgs.msg._Twist.Twist):
+        self.__linear = Translation(input_transform.linear)
+        self.__angular = Rotation(input_transform.angular)
 
     @property
     def linear(self) -> Translation:
