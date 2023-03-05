@@ -247,6 +247,9 @@ class Pose:
         output.orientation = self.__orientation.to_msg_quat()
         return output
 
+    def __repr__(self) -> str:
+        return f"X: {self.__position.x}, Y: {self.__position.y}, Z: {self.__position.z}"
+
 class Transform:
     def __init__(self, input_type = None):
         if input_type is None:
