@@ -47,6 +47,7 @@ class AnimationType(Enum):
     Twinkle = 6
     TwinkleOff = 7
     Strobe = 8
+    Morse = 20
 
 class Direction(Enum):
     Forward = 0
@@ -68,6 +69,7 @@ class LEDAnimation:
     direction : Direction = Direction.Forward
     offset : int = 0
     slot : int = 0
+    morse_message : str = ""
 
 @dataclass
 class LEDControl:
