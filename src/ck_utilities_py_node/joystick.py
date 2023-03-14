@@ -3,6 +3,8 @@ from dataclasses import dataclass
 from threading import Thread, Lock
 from enum import Enum
 from ck_ros_base_msgs_node.msg import Joystick_Status
+from ck_ros_base_msgs_node.msg import Joystick as RIO_Joystick
+
 from ck_utilities_py_node.ckmath import *
 from typing import Tuple
 
@@ -56,18 +58,19 @@ class Joystick:
             if self.__id in self.joystick_map:
                 if len(self.joystick_map[self.__id].buttons) > buttonID:
                     retVal = self.joystick_map[self.__id].buttons[buttonID]
-            return retVal
+            return retVal == 1
         return False
 
     def getRisingEdgeButton(self, buttonID : int) -> bool:
         if buttonID < MAX_NUM_BUTTONS():
-            currVal = False
+            currVal = 0
             if self.__id in self.joystick_map:
-                if len(self.joystick_map[self.__id].buttons) > buttonID:
-                    currVal = self.joystick_map[self.__id].buttons[buttonID]
-            retVal = currVal and (currVal != self.__prevButtonVals.get(id, False))
-            self.__prevButtonVals[buttonID] = currVal
-            return retVal
+                js : RIO_Joystick = self.joystick_map[self.__id]
+                if len(js.buttons) > buttonID:
+                    currVal = js.buttons[buttonID]
+                    retVal = currVal == 1 and (currVal != self.__prevButtonVals.get(buttonID, 0))
+                    self.__prevButtonVals[buttonID] = currVal
+                    return retVal == 1
         return False
 
     def getPOV(self, povID : int) -> int:
