@@ -34,8 +34,8 @@ class VBATConfigType(Enum):
     Modulated = 2
 
 class LEDControlMode(Enum):
-    Static = 0
-    Animated = 1
+    Static = 1
+    Animated = 2
 
 class AnimationType(Enum):
     ColorFlow = 0
